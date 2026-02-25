@@ -3,1947 +3,330 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>伊可 Yike - 我们的秘密小窝</title>
+    <title>伊可 Yike - 情侣小窝</title>
     
-    <!-- Google Fonts - 国内秒开 -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=ZCOOL+Kuai+Le&family=Zhi+Mang+Xing&display=swap" rel="stylesheet">
-    
-    <!-- Tailwind CSS (jsdelivr 稳定 CDN) -->
-    <script src="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/src/css/preflight.css"></script>
-    
-    <!-- 配置 Tailwind -->
+    <!-- 字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind (使用 CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        'main': "'Nunito', 'PingFang SC', 'Hiragino Sans GB', system-ui, sans-serif",
-                        'hand': "'ZCOOL Kuai Le', 'Zhi Mang Xing', cursive",
-                    },
-                    colors: {
-                        'coco': {
-                            bg: '#FDFBF7',
-                            pink: '#E8CFC8',
-                            blue: '#D4E4E6',
-                            text: '#4A403A',
-                            muted: '#9CA3AF',
-                            heart: '#E88D8D'
-                        }
-                    },
-                    animation: {
-                        'breathe': 'breathe 3s ease-in-out infinite',
-                        'float': 'float 8s ease-in-out infinite',
-                        'ping-slow': 'ping 3s cubic-bezier(0, 0, 0.2, 1) infinite',
-                    },
-                    keyframes: {
-                        breathe: {
-                            '0%, 100%': { transform: 'scale(1)', opacity: '0.3' },
-                            '50%': { transform: 'scale(1.5)', opacity: '0.1' },
-                        },
-                        float: {
-                            '0%, 100%': { transform: 'translate(0, 0)' },
-                            '33%': { transform: 'translate(30px, -30px)' },
-                            '66%': { transform: 'translate(-20px, 20px)' },
-                        }
-                    }
-                }
-            }
+            theme: { extend: { fontFamily: { sans: ['Nunito', 'sans-serif'] }, colors: { yike: { bg: '#FDFBF7', pink: '#E8CFC8', blue: '#D4E4E6', text: '#4A403A', gray: '#9CA3AF' } } } }
         }
     </script>
-    
     <style>
-        /* 全局样式重置 */
-        * {
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-        }
-        
-        body {
-            font-family: 'Nunito', 'PingFang SC', 'Hiragino Sans GB', system-ui, sans-serif;
-            background: linear-gradient(135deg, #FDFBF7 0%, #F5F0EB 100%);
-            color: #4A403A;
-            overflow: hidden;
-            -webkit-font-smoothing: antialiased;
-        }
-        
-        /* 字体设置 */
-        .font-hand { font-family: 'ZCOOL Kuai Le', 'Zhi Mang Xing', cursive; }
-        
-        /* 果冻触感 */
-        .jelly {
-            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .jelly:active { transform: scale(0.96); }
-        
-        /* 毛玻璃卡片 */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.03);
-        }
-        
-        /* 魔法下划线动画 */
-        .magic-strike {
-            position: relative;
-            overflow: hidden;
-        }
-        .magic-strike::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 50%;
-            width: 0;
-            height: 2px;
-            background: #E88D8D;
-            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .magic-strike.struck::after {
-            width: 100%;
-        }
-        
-        /* 爱心引爆粒子 */
-        .heart-particle {
-            position: absolute;
-            pointer-events: none;
-            animation: float-up 1s ease-out forwards;
-        }
-        @keyframes float-up {
-            0% { transform: translateY(0) scale(1); opacity: 1; }
-            100% { transform: translateY(-40px) scale(0.5); opacity: 0; }
-        }
-        
-        /* 录音水波纹 */
-        .record-ripple {
-            position: absolute;
-            border: 2px solid #E8CFC8;
-            border-radius: 50%;
-            animation: ripple 2s ease-out infinite;
-        }
-        @keyframes ripple {
-            0% { transform: scale(0.8); opacity: 1; }
-            100% { transform: scale(2.5); opacity: 0; }
-        }
-        
-        /* 滚动条美化 */
-        ::-webkit-scrollbar { width: 3px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(232, 207, 200, 0.5); border-radius: 3px; }
-        
-        /* 输入框美化 */
-        input, textarea {
-            outline: none;
-            -webkit-appearance: none;
-        }
-        input::placeholder, textarea::placeholder { color: #9CA3AF; }
-        
-        /* Toast 动画 */
-        .toast-enter { animation: slide-down 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        @keyframes slide-down {
-            0% { transform: translateY(-100%); opacity: 0; }
-            100% { transform: translateY(0); opacity: 1; }
-        }
-        
-        /* 呼吸灯 */
-        .breathing-dot {
-            position: relative;
-        }
-        .breathing-dot::before {
-            content: '';
-            position: absolute;
-            inset: -4px;
-            background: #68D391;
-            border-radius: 50%;
-            animation: ping-slow 3s cubic-bezier(0, 0, 0.2, 1) infinite;
-            opacity: 0.2;
-        }
-        
-        /* 简笔画信箱 */
-        .mailbox-draw {
-            stroke: #4A403A;
-            stroke-width: 2;
-            fill: none;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
+        body { background: #FDFBF7; margin: 0; overflow: hidden; font-family: 'Nunito', sans-serif; }
+        /* 动画 */
+        .anim-pop { animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes pop { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .anim-slide { animation: slideUp 0.4s ease-out; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
-    
-    <!-- React & ReactDOM -->
-    <script crossorigin src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
-    <script crossorigin src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
-    
-    <!-- Babel (内联编译) -->
-    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.min.js"></script>
-    
+
+    <!-- 依赖库 (按顺序加载) -->
+    <!-- React -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- LocalForage -->
+    <script src="https://unpkg.com/localforage@1.10.0/dist/localforage.min.js"></script>
     <!-- PeerJS -->
-    <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    
-    <!-- localforage -->
-    <script src="https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js"></script>
-    
-    <!-- Lucide Icons -->
-    <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.1/dist/umd/lucide.min.js"></script>
-    
-    <!-- Framer Motion -->
-    <script src="https://cdn.jsdelivr.net/npm/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 </head>
 <body>
+    <!-- 根容器 -->
     <div id="root"></div>
-    
+
+    <!-- React 逻辑 -->
     <script type="text/babel">
-        const { useState, useEffect, useRef, useCallback, createContext, useContext, memo } = React;
-        const { motion, AnimatePresence } = window.Motion;
-        
-        // ============ 工具函数 ============
-        const generateId = () => Math.random().toString(36).substr(2, 9);
-        const formatDate = (date) => new Date(date).toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' });
-        const formatTime = (date) => new Date(date).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-        
-        // 恋爱天数计算
-        const calculateLoveDays = (startDate) => {
-            const start = new Date(startDate);
-            const now = new Date();
-            const diffTime = Math.abs(now - start);
-            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const { useState, useEffect, useRef } = React;
+
+        // 简单的 ID 生成
+        const uid = () => Math.random().toString(36).substr(2, 6);
+        const time = (ts) => new Date(ts).toLocaleString('zh-CN', {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'});
+
+        // 图标
+        const Icon = {
+            Heart: () => <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>,
+            Send: () => <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13"/></svg>,
+            Home: () => <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>,
+            Msg: () => <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
+            List: () => <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
         };
-        
-        // ============ 本地存储初始化 ============
-        localforage.config({ name: 'YikeApp', storeName: 'yike_data' });
-        
-        // ============ 全局上下文 ============
-        const AppContext = createContext();
-        
-        const AppProvider = ({ children }) => {
-            const [user, setUser] = useState(null); // 用户信息 { id, peerId, name }
-            const [partner, setPartner] = useState(null); // 伴侣信息
-            const [connectionStatus, setConnectionStatus] = useState('disconnected'); // disconnected, connecting, connected
-            const [toasts, setToasts] = useState([]);
-            const [treeholes, setTreeholes] = useState([]);
+
+        function App() {
+            // 状态
+            const [page, setPage] = useState('init'); // init, login, home
+            const [tab, setTab] = useState('msg'); // msg, todo
+            const [msgs, setMsgs] = useState([]);
             const [todos, setTodos] = useState([]);
-            const [voiceMemos, setVoiceMemos] = useState([]);
-            const [loveStartDate, setLoveStartDate] = useState(null);
-            const [notifications, setNotifications] = useState({ soundEnabled: false, customSoundId: null });
+            const [me, setMe] = useState('');
+            const [partner, setPartner] = useState('');
+            const [conn, setConn] = useState(null);
+            const [status, setStatus] = useState('disconnected'); // connected, disconnected
             
-            const peerRef = useRef(null);
-            const connRef = useRef(null);
-            const reconnectTimeoutRef = useRef(null);
-            
-            // 显示 Toast
-            const showToast = useCallback((message) => {
-                const id = generateId();
-                setToasts(prev => [...prev, { id, message }]);
-                setTimeout(() => {
-                    setToasts(prev => prev.filter(t => t.id !== id));
-                }, 3000);
-            }, []);
-            
-            // 保存用户配对信息到 localStorage
-            const savePairingInfo = useCallback((myId, peerId, partnerName, startDate) => {
-                localStorage.setItem('yike_pairing', JSON.stringify({
-                    myId,
-                    peerId,
-                    partnerName,
-                    startDate,
-                    pairedAt: Date.now()
-                }));
-            }, []);
-            
-            // 加载配对信息
-            const loadPairingInfo = useCallback(() => {
-                const saved = localStorage.getItem('yike_pairing');
-                if (saved) {
-                    return JSON.parse(saved);
-                }
-                return null;
-            }, []);
-            
-            // 初始化 PeerJS
-            const initPeer = useCallback((myId, partnerId = null) => {
-                if (peerRef.current) {
-                    peerRef.current.destroy();
-                }
-                
-                setConnectionStatus('connecting');
-                
-                const peer = new Peer(myId, {
-                    debug: 0
-                });
-                
-                peer.on('open', (id) => {
-                    console.log('PeerJS 连接成功:', id);
-                    if (partnerId) {
-                        connectToPartner(partnerId);
+            // 登录表单
+            const [inputCode, setInputCode] = useState('');
+            const [myCode, setMyCode] = useState('');
+
+            // 初始化
+            useEffect(() => {
+                const init = async () => {
+                    // 读取缓存
+                    const savedMe = localStorage.getItem('y_me');
+                    const savedPartner = localStorage.getItem('y_partner');
+                    
+                    // 读取 IndexedDB 数据
+                    const m = await localforage.getItem('y_msgs') || [];
+                    const t = await localforage.getItem('y_todos') || [];
+                    setMsgs(m);
+                    setTodos(t);
+
+                    if (savedMe && savedPartner) {
+                        setMe(savedMe);
+                        setPartner(savedPartner);
+                        setPage('home');
+                        connectPeer(savedMe, savedPartner);
                     } else {
-                        setConnectionStatus('connected');
-                        setUser({ id: myId, peerId: id });
-                    }
-                });
-                
-                peer.on('connection', (conn) => {
-                    handleNewConnection(conn);
-                });
-                
-                peer.on('error', (err) => {
-                    console.error('PeerJS 错误:', err);
-                    setConnectionStatus('disconnected');
-                    
-                    // 自动重连
-                    if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
-                    reconnectTimeoutRef.current = setTimeout(() => {
-                        initPeer(myId, partnerId);
-                    }, 5000);
-                });
-                
-                peerRef.current = peer;
-            }, []);
-            
-            // 连接到伴侣
-            const connectToPartner = useCallback((partnerId) => {
-                if (!peerRef.current) return;
-                
-                const conn = peerRef.current.connect(partnerId, { reliable: true });
-                
-                conn.on('open', () => {
-                    console.log('已连接到伴侣');
-                    connRef.current = conn;
-                    setConnectionStatus('connected');
-                    
-                    // 同步本地数据
-                    sendSyncData(conn);
-                });
-                
-                conn.on('data', (data) => {
-                    handleIncomingData(data);
-                });
-                
-                conn.on('close', () => {
-                    setConnectionStatus('disconnected');
-                });
-                
-                conn.on('error', (err) => {
-                    console.error('连接错误:', err);
-                    setConnectionStatus('disconnected');
-                });
-            }, []);
-            
-            // 处理新连接
-            const handleNewConnection = useCallback((conn) => {
-                conn.on('open', () => {
-                    console.log('伴侣已连接');
-                    connRef.current = conn;
-                    setConnectionStatus('connected');
-                    sendSyncData(conn);
-                });
-                
-                conn.on('data', (data) => {
-                    handleIncomingData(data);
-                });
-                
-                conn.on('close', () => {
-                    setConnectionStatus('disconnected');
-                });
-            }, []);
-            
-            // 发送同步数据
-            const sendSyncData = useCallback((conn) => {
-                if (conn && conn.open) {
-                    conn.send({
-                        type: 'SYNC_REQUEST',
-                        from: user?.id
-                    });
-                }
-            }, [user]);
-            
-            // 处理接收到的数据
-            const handleIncomingData = useCallback((data) => {
-                console.log('收到数据:', data.type);
-                
-                switch (data.type) {
-                    case 'TREEHOLE':
-                        setTreeholes(prev => {
-                            if (prev.find(t => t.id === data.payload.id)) return prev;
-                            return [data.payload, ...prev];
-                        });
-                        if (data.payload.type === 'create') {
-                            showToast('叮咚，TA 给你留了新纸条~');
-                        }
-                        break;
-                        
-                    case 'TREEHOLE_LIKE':
-                        setTreeholes(prev => prev.map(t => 
-                            t.id === data.payload.id 
-                                ? { ...t, likes: data.payload.likes, likedBy: data.payload.likedBy }
-                                : t
-                        ));
-                        break;
-                        
-                    case 'TREEHOLE_REPLY':
-                        setTreeholes(prev => prev.map(t => 
-                            t.id === data.payload.treeholeId 
-                                ? { ...t, replies: [...(t.replies || []), data.payload.reply] }
-                                : t
-                        ));
-                        break;
-                        
-                    case 'TODO':
-                        setTodos(prev => {
-                            if (data.payload.action === 'delete') {
-                                return prev.filter(t => t.id !== data.payload.id);
-                            }
-                            if (prev.find(t => t.id === data.payload.id)) return prev;
-                            return [data.payload, ...prev];
-                        });
-                        if (data.payload.type === 'create') {
-                            showToast('叮咚，TA 给你留了新纸条~');
-                        }
-                        break;
-                        
-                    case 'TODO_COMPLETE':
-                        setTodos(prev => prev.map(t => 
-                            t.id === data.payload.id 
-                                ? { ...t, completed: true, completedAt: data.payload.completedAt }
-                                : t
-                        ));
-                        break;
-                        
-                    case 'VOICE':
-                        setVoiceMemos(prev => {
-                            if (prev.find(v => v.id === data.payload.id)) return prev;
-                            return [data.payload, ...prev];
-                        });
-                        if (data.payload.type === 'create') {
-                            showToast('听到远方的声音啦~');
-                            playNotificationSound();
-                        }
-                        break;
-                        
-                    case 'SYNC_REQUEST':
-                        // 对方请求同步，发送完整数据
-                        if (connRef.current) {
-                            connRef.current.send({
-                                type: 'SYNC_RESPONSE',
-                                payload: {
-                                    treeholes: treeholes,
-                                    todos: todos,
-                                    voiceMemos: voiceMemos,
-                                    loveStartDate: loveStartDate
-                                }
-                            });
-                        }
-                        break;
-                        
-                    case 'SYNC_RESPONSE':
-                        // 合并对方数据（按时间戳）
-                        if (data.payload.treeholes) {
-                            setTreeholes(prev => {
-                                const merged = [...prev];
-                                data.payload.treeholes.forEach(t => {
-                                    if (!merged.find(m => m.id === t.id)) {
-                                        merged.push(t);
-                                    }
-                                });
-                                return merged.sort((a, b) => b.createdAt - a.createdAt);
-                            });
-                        }
-                        if (data.payload.todos) {
-                            setTodos(prev => {
-                                const merged = [...prev];
-                                data.payload.todos.forEach(t => {
-                                    if (!merged.find(m => m.id === t.id)) {
-                                        merged.push(t);
-                                    }
-                                });
-                                return merged.sort((a, b) => b.createdAt - a.createdAt);
-                            });
-                        }
-                        if (data.payload.voiceMemos) {
-                            setVoiceMemos(prev => {
-                                const merged = [...prev];
-                                data.payload.voiceMemos.forEach(v => {
-                                    if (!merged.find(m => m.id === v.id)) {
-                                        merged.push(v);
-                                    }
-                                });
-                                return merged.sort((a, b) => b.createdAt - a.createdAt);
-                            });
-                        }
-                        if (data.payload.loveStartDate && !loveStartDate) {
-                            setLoveStartDate(data.payload.loveStartDate);
-                        }
-                        break;
-                }
-            }, [treeholes, todos, voiceMemos, loveStartDate, showToast]);
-            
-            // 发送数据给伴侣
-            const sendToPartner = useCallback((type, payload) => {
-                if (connRef.current && connRef.current.open) {
-                    connRef.current.send({ type, payload });
-                }
-            }, []);
-            
-            // 添加树洞
-            const addTreehole = useCallback(async (content, isAnonymous) => {
-                const treehole = {
-                    id: generateId(),
-                    content,
-                    isAnonymous,
-                    authorId: user?.id,
-                    authorName: isAnonymous ? '神秘人' : user?.name,
-                    likes: 0,
-                    likedBy: [],
-                    replies: [],
-                    createdAt: Date.now()
-                };
-                
-                setTreeholes(prev => [treehole, ...prev]);
-                await localforage.setItem('treeholes', [treehole, ...treeholes]);
-                sendToPartner('TREEHOLE', { ...treehole, type: 'create' });
-            }, [user, treeholes, sendToPartner]);
-            
-            // 点赞树洞
-            const likeTreehole = useCallback((id) => {
-                setTreeholes(prev => prev.map(t => {
-                    if (t.id === id) {
-                        const isLiked = t.likedBy.includes(user?.id);
-                        const newLikes = isLiked ? t.likes - 1 : t.likes + 1;
-                        const newLikedBy = isLiked 
-                            ? t.likedBy.filter(l => l !== user?.id)
-                            : [...t.likedBy, user?.id];
-                        
-                        sendToPartner('TREEHOLE_LIKE', { id, likes: newLikes, likedBy: newLikedBy });
-                        
-                        return { ...t, likes: newLikes, likedBy: newLikedBy };
-                    }
-                    return t;
-                }));
-            }, [user, sendToPartner]);
-            
-            // 回复树洞
-            const replyTreehole = useCallback((treeholeId, replyContent) => {
-                const reply = {
-                    id: generateId(),
-                    content: replyContent,
-                    authorId: user?.id,
-                    authorName: user?.name,
-                    createdAt: Date.now()
-                };
-                
-                setTreeholes(prev => prev.map(t => {
-                    if (t.id === treeholeId) {
-                        return { ...t, replies: [...(t.replies || []), reply] };
-                    }
-                    return t;
-                }));
-                
-                sendToPartner('TREEHOLE_REPLY', { treeholeId, reply });
-            }, [user, sendToPartner]);
-            
-            // 添加待办
-            const addTodo = useCallback(async (content, category) => {
-                const todo = {
-                    id: generateId(),
-                    content,
-                    category, // 'partner' | 'together'
-                    completed: false,
-                    createdAt: Date.now(),
-                    createdBy: user?.id
-                };
-                
-                setTodos(prev => [todo, ...todos]);
-                await localforage.setItem('todos', [todo, ...todos]);
-                sendToPartner('TODO', { ...todo, type: 'create' });
-            }, [user, todos, sendToPartner]);
-            
-            // 完成待办
-            const completeTodo = useCallback((id) => {
-                setTodos(prev => prev.map(t => {
-                    if (t.id === id) {
-                        sendToPartner('TODO_COMPLETE', { id, completedAt: Date.now() });
-                        return { ...t, completed: true, completedAt: Date.now() };
-                    }
-                    return t;
-                }));
-            }, [sendToPartner]);
-            
-            // 删除待办
-            const deleteTodo = useCallback((id) => {
-                setTodos(prev => prev.filter(t => t.id !== id));
-                sendToPartner('TODO', { id, action: 'delete' });
-            }, [sendToPartner]);
-            
-            // 录音相关
-            const addVoiceMemo = useCallback(async (blob, duration) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(blob);
-                reader.onloadend = () => {
-                    const base64 = reader.result;
-                    const voiceMemo = {
-                        id: generateId(),
-                        audio: base64,
-                        duration,
-                        createdAt: Date.now(),
-                        createdBy: user?.id,
-                        authorName: user?.name
-                    };
-                    
-                    setVoiceMemos(prev => [voiceMemo, ...voiceMemos]);
-                    localforage.setItem('voiceMemos', [voiceMemo, ...voiceMemos]);
-                    sendToPartner('VOICE', { ...voiceMemo, type: 'create' });
-                };
-            }, [user, voiceMemos, sendToPartner]);
-            
-            // 播放提示音
-            const playNotificationSound = useCallback(() => {
-                if (notifications.soundEnabled) {
-                    const audio = new Audio(voiceMemos.find(v => v.id === notifications.customSoundId)?.audio);
-                    if (audio) audio.play().catch(() => {});
-                }
-            }, [notifications, voiceMemos]);
-            
-            // 导出数据
-            const exportData = useCallback(() => {
-                const data = {
-                    version: 1,
-                    exportDate: new Date().toISOString(),
-                    treeholes,
-                    todos,
-                    voiceMemos,
-                    loveStartDate
-                };
-                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `yike-backup-${formatDate(Date.now())}.json`;
-                a.click();
-                URL.revokeObjectURL(url);
-                showToast('回忆已打包~');
-            }, [treeholes, todos, voiceMemos, loveStartDate, showToast]);
-            
-            // 导入数据
-            const importData = useCallback((file) => {
-                const reader = new FileReader();
-                reader.readAsText(file);
-                reader.onloadend = () => {
-                    try {
-                        const data = JSON.parse(reader.result);
-                        if (data.treeholes) {
-                            setTreeholes(prev => {
-                                const merged = [...prev];
-                                data.treeholes.forEach(t => {
-                                    if (!merged.find(m => m.id === t.id)) {
-                                        merged.push(t);
-                                    }
-                                });
-                                return merged.sort((a, b) => b.createdAt - a.createdAt);
-                            });
-                        }
-                        if (data.todos) {
-                            setTodos(prev => {
-                                const merged = [...prev];
-                                data.todos.forEach(t => {
-                                    if (!merged.find(m => m.id === t.id)) {
-                                        merged.push(t);
-                                    }
-                                });
-                                return merged.sort((a, b) => b.createdAt - a.createdAt);
-                            });
-                        }
-                        if (data.voiceMemos) {
-                            setVoiceMemos(prev => {
-                                const merged = [...prev];
-                                data.voiceMemos.forEach(v => {
-                                    if (!merged.find(m => m.id === v.id)) {
-                                        merged.push(v);
-                                    }
-                                });
-                                return merged.sort((a, b) => b.createdAt - a.createdAt);
-                            });
-                        }
-                        if (data.loveStartDate) {
-                            setLoveStartDate(data.loveStartDate);
-                        }
-                        showToast('时光已恢复~');
-                    } catch (e) {
-                        showToast('文件格式不对呢...');
+                        setPage('login');
                     }
                 };
-            }, [showToast]);
-            
-            // 初始化加载
-            useEffect(() => {
-                const loadData = async () => {
-                    const treeholesData = await localforage.getItem('treeholes');
-                    const todosData = await localforage.getItem('todos');
-                    const voiceData = await localforage.getItem('voiceMemos');
-                    const loveDate = await localforage.getItem('loveStartDate');
-                    
-                    if (treeholesData) setTreeholes(treeholesData);
-                    if (todosData) setTodos(todosData);
-                    if (voiceData) setVoiceMemos(voiceData);
-                    if (loveDate) setLoveStartDate(loveDate);
-                    
-                    const notificationsData = await localforage.getItem('notifications');
-                    if (notificationsData) setNotifications(notificationsData);
-                };
-                loadData();
+                // 稍微延迟，确保库加载完成
+                setTimeout(init, 500);
             }, []);
-            
-            // 保存设置
-            useEffect(() => {
-                localforage.setItem('notifications', notifications);
-            }, [notifications]);
-            
-            // 清理函数
-            useEffect(() => {
-                return () => {
-                    if (peerRef.current) peerRef.current.destroy();
-                    if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
-                };
-            }, []);
-            
-            return (
-                <AppContext.Provider value={{
-                    // 状态
-                    user, setUser,
-                    partner, setPartner,
-                    connectionStatus,
-                    toasts,
-                    treeholes, setTreeholes,
-                    todos,
-                    voiceMemos,
-                    loveStartDate, setLoveStartDate,
-                    notifications, setNotifications,
-                    
-                    // 方法
-                    initPeer,
-                    savePairingInfo,
-                    loadPairingInfo,
-                    addTreehole,
-                    likeTreehole,
-                    replyTreehole,
-                    addTodo,
-                    completeTodo,
-                    deleteTodo,
-                    addVoiceMemo,
-                    exportData,
-                    importData,
-                    showToast
-                }}>
-                    {children}
-                </AppContext.Provider>
-            );
-        };
-        
-        // ============ 组件 ============
-        
-        // 动效组件：爱心引爆
-        const HeartBurst = ({ onComplete }) => {
-            const particles = [
-                { left: '20%', delay: 0 },
-                { left: '50%', delay: 0.1 },
-                { left: '80%', delay: 0.2 }
-            ];
-            
-            useEffect(() => {
-                const timer = setTimeout(onComplete, 1000);
-                return () => clearTimeout(timer);
-            }, [onComplete]);
-            
-            return (
-                <div className="absolute inset-0 pointer-events-none">
-                    {particles.map((p, i) => (
-                        <motion.div
-                            key={i}
-                            initial={{ opacity: 1, scale: 1, y: 0 }}
-                            animate={{ opacity: 0, scale: 0.5, y: -60 }}
-                            transition={{ duration: 0.8, delay: p.delay, ease: 'easeOut' }}
-                            className="absolute bottom-1/2 left-1/2 text-❤️"
-                            style={{ left: p.left, transform: 'translateX(-50%)' }}
-                        >
-                            ❤️
-                        </motion.div>
-                    ))}
-                </div>
-            );
-        };
-        
-        // Toast 组件
-        const Toast = ({ message }) => (
-            <motion.div
-                initial={{ y: -60, opacity: 0 }}
-                animate={{ y: 20, opacity: 1 }}
-                exit={{ y: -60, opacity: 0 }}
-                className="fixed top-0 left-1/2 -translate-x-1/2 z-50 
-                           bg-white/90 backdrop-blur-md px-6 py-3 rounded-full 
-                           shadow-lg border border-white/60 text-coco-text text-sm font-medium
-                           toast-enter"
-            >
-                {message}
-            </motion.div>
-        );
-        
-        // 呼吸灯组件
-        const BreathingIndicator = ({ isOnline }) => (
-            <div className="relative flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-400 breathing-dot' : 'bg-gray-300'}`}></div>
-                <span className={`text-xs ${isOnline ? 'text-green-600' : 'text-coco-muted'}`}>
-                    {isOnline ? 'TA 正在陪着你' : '正在寻找 TA...'}
-                </span>
-            </div>
-        );
-        
-        // 首页（牵手页）
-        const OnboardingPage = () => {
-            const { initPeer, savePairingInfo, loadPairingInfo, setUser, setLoveStartDate, setPartner, showToast } = useContext(AppContext);
-            const [mode, setMode] = useState('welcome'); // welcome, create, join
-            const [myName, setMyName] = useState('');
-            const [partnerName, setPartnerName] = useState('');
-            const [partnerId, setPartnerId] = useState('');
-            const [loveDate, setLoveDate] = useState('');
-            const [isLoading, setIsLoading] = useState(false);
-            
-            // 检查是否已配对
-            useEffect(() => {
-                const saved = loadPairingInfo();
-                if (saved) {
-                    setUser({ id: saved.myId, name: '我' });
-                    setPartner({ name: saved.partnerName });
-                    setLoveStartDate(saved.startDate);
-                    initPeer(saved.myId, saved.peerId);
-                }
-            }, []);
-            
-            const handleCreate = async () => {
-                if (!myName || !partnerName || !loveDate) {
-                    showToast('请填写完整信息~');
-                    return;
-                }
-                
-                setIsLoading(true);
-                const myId = generateId();
-                const peerId = generateId(); // 简化：直接用随机ID
-                
-                // 保存到本地存储
-                savePairingInfo(myId, peerId, partnerName, loveDate);
-                
-                setUser({ id: myId, name: myName });
-                setPartner({ name: partnerName });
-                setLoveStartDate(loveDate);
-                await localforage.setItem('loveStartDate', loveDate);
-                
-                initPeer(myId, peerId);
-            };
-            
-            const handleJoin = () => {
-                if (!partnerId || !myName || !loveDate) {
-                    showToast('请填写完整信息~');
-                    return;
-                }
-                
-                setIsLoading(true);
-                const myId = generateId();
-                
-                savePairingInfo(myId, partnerId, 'TA', loveDate);
-                
-                setUser({ id: myId, name: myName });
-                setPartner({ name: 'TA' });
-                setLoveStartDate(loveDate);
-                await localforage.setItem('loveStartDate', loveDate);
-                
-                initPeer(myId, partnerId);
-            };
-            
-            if (mode === 'welcome') {
-                return (
-                    <div className="h-full flex flex-col items-center justify-center p-8">
-                        {/* 动态背景光斑 */}
-                        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                            <div className="absolute top-20 left-10 w-40 h-40 bg-coco-pink/30 rounded-full blur-[80px] animate-float"></div>
-                            <div className="absolute bottom-40 right-10 w-48 h-48 bg-coco-blue/30 rounded-full blur-[80px] animate-float" style={{ animationDelay: '2s' }}></div>
-                        </div>
-                        
-                        <motion.div
-                            initial={{ scale: 0.8, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ duration: 0.6 }}
-                            className="text-center z-10"
-                        >
-                            <div className="text-6xl mb-4">🏠</div>
-                            <h1 className="text-4xl font-hand text-coco-text mb-2">伊可</h1>
-                            <p className="text-coco-muted mb-8">我们的数字秘密小窝</p>
-                            
-                            <div className="space-y-4 w-full max-w-xs">
-                                <button
-                                    onClick={() => setMode('create')}
-                                    className="w-full py-4 bg-coco-pink rounded-2xl text-white font-medium jelly shadow-lg"
-                                >
-                                    生成红线暗号
-                                </button>
-                                <button
-                                    onClick={() => setMode('join')}
-                                    className="w-full py-4 bg-white rounded-2xl text-coco-text font-medium jelly shadow-lg border border-white/60"
-                                >
-                                    牵手 TA
-                                </button>
-                            </div>
-                        </motion.div>
-                    </div>
-                );
-            }
-            
-            return (
-                <div className="h-full flex flex-col p-6 overflow-y-auto">
-                    <button 
-                        onClick={() => setMode('welcome')}
-                        className="text-coco-muted text-sm mb-6 jelly self-start"
-                    >
-                        ← 返回
-                    </button>
-                    
-                    {mode === 'create' ? (
-                        <motion.div
-                            initial={{ x: 50, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            className="flex-1 flex flex-col"
-                        >
-                            <h2 className="text-2xl font-hand text-coco-text mb-6">搭建小窝</h2>
-                            
-                            <div className="space-y-4 flex-1">
-                                <div>
-                                    <label className="block text-sm text-coco-muted mb-2">我的名字</label>
-                                    <input
-                                        type="text"
-                                        value={myName}
-                                        onChange={(e) => setMyName(e.target.value)}
-                                        placeholder="你的昵称"
-                                        className="w-full p-4 glass-card rounded-2xl focus:ring-2 focus:ring-coco-pink/30"
-                                    />
-                                </div>
-                                
-                                <div>
-                                    <label className="block text-sm text-coco-muted mb-2">TA 的名字</label>
-                                    <input
-                                        type="text"
-                                        value={partnerName}
-                                        onChange={(e) => setPartnerName(e.target.value)}
-                                        placeholder="亲爱的 TA"
-                                        className="w-full p-4 glass-card rounded-2xl focus:ring-2 focus:ring-coco-pink/30"
-                                    />
-                                </div>
-                                
-                                <div>
-                                    <label className="block text-sm text-coco-muted mb-2">在一起的日子</label>
-                                    <input
-                                        type="date"
-                                        value={loveDate}
-                                        onChange={(e) => setLoveDate(e.target.value)}
-                                        className="w-full p-4 glass-card rounded-2xl focus:ring-2 focus:ring-coco-pink/30 text-coco-text"
-                                    />
-                                </div>
-                                
-                                <div className="bg-coco-pink/20 p-4 rounded-2xl">
-                                    <p className="text-sm text-coco-text">
-                                        <span className="font-medium">生成暗号后</span>，请将暗号复制发送给 TA，让 TA 来牵手你们的小窝~
-                                    </p>
-                                </div>
-                            </div>
-                            
-                            <button
-                                onClick={handleCreate}
-                                disabled={isLoading}
-                                className="w-full py-4 bg-coco-pink rounded-2xl text-white font-medium jelly shadow-lg mt-6 disabled:opacity-50"
-                            >
-                                {isLoading ? '搭建中...' : '生成红线暗号'}
-                            </button>
-                        </motion.div>
-                    ) : (
-                        <motion.div
-                            initial={{ x: -50, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            className="flex-1 flex flex-col"
-                        >
-                            <h2 className="text-2xl font-hand text-coco-text mb-6">牵手 TA</h2>
-                            
-                            <div className="space-y-4 flex-1">
-                                <div>
-                                    <label className="block text-sm text-coco-muted mb-2">我的名字</label>
-                                    <input
-                                        type="text"
-                                        value={myName}
-                                        onChange={(e) => setMyName(e.target.value)}
-                                        placeholder="你的昵称"
-                                        className="w-full p-4 glass-card rounded-2xl focus:ring-2 focus:ring-coco-pink/30"
-                                    />
-                                </div>
-                                
-                                <div>
-                                    <label className="block text-sm text-coco-muted mb-2">TA 发来的暗号</label>
-                                    <input
-                                        type="text"
-                                        value={partnerId}
-                                        onChange={(e) => setPartnerId(e.target.value)}
-                                        placeholder="粘贴暗号"
-                                        className="w-full p-4 glass-card rounded-2xl focus:ring-2 focus:ring-coco-pink/30"
-                                    />
-                                </div>
-                                
-                                <div>
-                                    <label className="block text-sm text-coco-muted mb-2">在一起的日子</label>
-                                    <input
-                                        type="date"
-                                        value={loveDate}
-                                        onChange={(e) => setLoveDate(e.target.value)}
-                                        className="w-full p-4 glass-card rounded-2xl focus:ring-2 focus:ring-coco-pink/30 text-coco-text"
-                                    />
-                                </div>
-                            </div>
-                            
-                            <button
-                                onClick={handleJoin}
-                                disabled={isLoading}
-                                className="w-full py-4 bg-coco-pink rounded-2xl text-white font-medium jelly shadow-lg mt-6 disabled:opacity-50"
-                            >
-                                {isLoading ? '牵手ing...' : '牵手 TA'}
-                            </button>
-                        </motion.div>
-                    )}
-                </div>
-            );
-        };
-        
-        // 树洞卡片组件
-        const TreeholeCard = ({ treehole }) => {
-            const { user, likeTreehole, replyTreehole } = useContext(AppContext);
-            const [showReplyInput, setShowReplyInput] = useState(false);
-            const [replyContent, setReplyContent] = useState('');
-            const [showBurst, setShowBurst] = useState(false);
-            const cardRef = useRef(null);
-            
-            const handleLike = () => {
-                likeTreehole(treehole.id);
-                setShowBurst(true);
-            };
-            
-            const handleReply = () => {
-                if (replyContent.trim()) {
-                    replyTreehole(treehole.id, replyContent);
-                    setReplyContent('');
-                    setShowReplyInput(false);
-                }
-            };
-            
-            const quickReplies = ['抱抱你', '我在呢', '辛苦啦'];
-            
-            return (
-                <motion.div
-                    ref={cardRef}
-                    initial={{ y: 30, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    className="glass-card rounded-3xl p-5 mb-4 relative overflow-hidden"
-                >
-                    {showBurst && <HeartBurst onComplete={() => setShowBurst(false)} />}
-                    
-                    <div className="flex items-start gap-3">
-                        <div className="text-2xl">{treehole.isAnonymous ? '🎭' : '💬'}</div>
-                        <div className="flex-1">
-                            <p className="text-coco-text leading-relaxed">{treehole.content}</p>
-                            <div className="flex items-center gap-3 mt-3 text-xs text-coco-muted">
-                                <span>{treehole.authorName}</span>
-                                <span>·</span>
-                                <span>{formatTime(treehole.createdAt)}</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    {/* 操作栏 */}
-                    <div className="flex items-center gap-4 mt-4 pt-4 border-t border-gray-100">
-                        <button
-                            onClick={handleLike}
-                            className="flex items-center gap-1.5 jelly"
-                        >
-                            <motion.span
-                                whileTap={{ scale: 0.8 }}
-                                animate={showBurst ? { scale: [1, 1.4, 1] } : {}}
-                                className={`${treehole.likedBy.includes(user?.id) ? 'text-coco-heart' : 'text-coco-muted'}`}
-                            >
-                                ❤️
-                            </motion.span>
-                            <span className={`text-sm ${treehole.likedBy.includes(user?.id) ? 'text-coco-heart' : 'text-coco-muted'}`}>
-                                {treehole.likes}
-                            </span>
-                        </button>
-                        
-                        <button
-                            onClick={() => setShowReplyInput(!showReplyInput)}
-                            className="flex items-center gap-1.5 jelly"
-                        >
-                            <span className="text-coco-muted">💌</span>
-                            <span className="text-sm text-coco-muted">回复</span>
-                        </button>
-                        
-                        {treehole.replies?.length > 0 && (
-                            <span className="text-xs text-coco-muted">
-                                {treehole.replies.length} 条回复
-                            </span>
-                        )}
-                    </div>
-                    
-                    {/* 回复输入 */}
-                    <AnimatePresence>
-                        {showReplyInput && (
-                            <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: 'auto', opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                className="mt-4 overflow-hidden"
-                            >
-                                <div className="flex gap-2 mb-2 overflow-x-auto py-1">
-                                    {quickReplies.map(reply => (
-                                        <button
-                                            key={reply}
-                                            onClick={() => {
-                                                replyTreehole(treehole.id, reply);
-                                                setShowReplyInput(false);
-                                            }}
-                                            className="px-3 py-1 bg-coco-pink/20 text-coco-text text-sm rounded-full whitespace-nowrap jelly"
-                                        >
-                                            {reply}
-                                        </button>
-                                    ))}
-                                </div>
-                                <div className="flex gap-2">
-                                    <input
-                                        type="text"
-                                        value={replyContent}
-                                        onChange={(e) => setReplyContent(e.target.value)}
-                                        placeholder="写下你的回复..."
-                                        className="flex-1 p-2 bg-white/50 rounded-xl text-sm focus:outline-none"
-                                        onKeyPress={(e) => e.key === 'Enter' && handleReply()}
-                                    />
-                                    <button
-                                        onClick={handleReply}
-                                        className="px-4 py-2 bg-coco-pink rounded-xl text-white text-sm jelly"
-                                    >
-                                        发送
-                                    </button>
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                    
-                    {/* 回复列表 */}
-                    {treehole.replies?.length > 0 && (
-                        <div className="mt-4 space-y-2 border-t border-gray-100 pt-4">
-                            {treehole.replies.map((reply, i) => (
-                                <motion.div
-                                    key={reply.id || i}
-                                    initial={{ x: -10, opacity: 0 }}
-                                    animate={{ x: 0, opacity: 1 }}
-                                    transition={{ delay: i * 0.1 }}
-                                    className="bg-white/30 rounded-xl p-3 text-sm"
-                                >
-                                    <span className="font-medium text-coco-pink">{reply.authorName}: </span>
-                                    <span className="text-coco-text">{reply.content}</span>
-                                </motion.div>
-                            ))}
-                        </div>
-                    )}
-                </motion.div>
-            );
-        };
-        
-        // 待办卡片组件
-        const TodoCard = ({ todo }) => {
-            const { completeTodo, deleteTodo } = useContext(AppContext);
-            const [isStriking, setIsStriking] = useState(false);
-            const [isFalling, setIsFalling] = useState(false);
-            
-            const handleComplete = () => {
-                setIsStriking(true);
-                setTimeout(() => {
-                    setIsFalling(true);
-                    setTimeout(() => {
-                        completeTodo(todo.id);
-                        setIsFalling(false);
-                    }, 400);
-                }, 400);
-            };
-            
-            if (isFalling) {
-                return (
-                    <motion.div
-                        initial={{ x: 0, y: 0, opacity: 1 }}
-                        animate={{ x: 20, y: 100, opacity: 0 }}
-                        transition={{ duration: 0.4, ease: 'easeIn' }}
-                        className="glass-card rounded-3xl p-4 mb-3 bg-gray-50"
-                    >
-                        <div className="flex items-center gap-3">
-                            <div className="w-5 h-5 rounded-full border-2 border-gray-300"></div>
-                            <span className="text-gray-400 line-through">{todo.content}</span>
-                        </div>
-                    </motion.div>
-                );
-            }
-            
-            return (
-                <motion.div
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    className={`glass-card rounded-3xl p-4 mb-3 transition-all duration-300 ${isStriking ? 'bg-gray-50' : ''}`}
-                >
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={handleComplete}
-                            className="flex-shrink-0 w-6 h-6 rounded-full border-2 border-coco-pink flex items-center justify-center jelly"
-                        >
-                            {todo.completed && (
-                                <motion.div
-                                    initial={{ scale: 0 }}
-                                    animate={{ scale: 1 }}
-                                    className="w-4 h-4 rounded-full bg-coco-pink"
-                                />
-                            )}
-                        </button>
-                        
-                        <div className="flex-1 min-w-0">
-                            <div className={`text-coco-text ${todo.completed ? 'line-through text-gray-400' : ''}`}>
-                                {todo.content}
-                            </div>
-                            <div className="text-xs text-coco-muted mt-1 flex items-center gap-2">
-                                <span>{todo.category === 'partner' ? '🫂 TA 身边的小事' : '🌟 一起完成的成就'}</span>
-                            </div>
-                        </div>
-                        
-                        {!todo.completed && (
-                            <button
-                                onClick={() => deleteTodo(todo.id)}
-                                className="text-coco-muted jelly p-1"
-                            >
-                                <span className="text-sm">×</span>
-                            </button>
-                        )}
-                    </div>
-                    
-                    {/* 魔法下划线动画 */}
-                    <motion.div
-                        className={`h-0.5 bg-coco-pink/50 mt-3 ${isStriking ? 'magic-strike struck' : 'magic-strike'}`}
-                        style={{ transition: isStriking ? 'none' : undefined }}
-                    />
-                </motion.div>
-            );
-        };
-        
-        // 录音组件
-        const VoiceRecorder = () => {
-            const { addVoiceMemo, showToast } = useContext(AppContext);
-            const [isRecording, setIsRecording] = useState(false);
-            const [recordingTime, setRecordingTime] = useState(0);
-            const [audioBlob, setAudioBlob] = useState(null);
-            const mediaRecorderRef = useRef(null);
-            const chunksRef = useRef([]);
-            const timerRef = useRef(null);
-            
-            const startRecording = async () => {
+
+            // P2P 连接逻辑
+            const connectPeer = (myId, partnerId) => {
+                setStatus('connecting');
                 try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorderRef.current = new MediaRecorder(stream);
-                    chunksRef.current = [];
+                    const peer = new Peer(myId);
                     
-                    mediaRecorderRef.current.ondataavailable = (e) => {
-                        if (e.data.size > 0) {
-                            chunksRef.current.push(e.data);
-                        }
-                    };
+                    // 超时保护：10秒没连上就算失败
+                    const timer = setTimeout(() => {
+                        setStatus('disconnected');
+                        alert("连接超时，请检查网络或重新生成暗号");
+                    }, 10000);
+
+                    peer.on('open', () => {
+                        const conn = peer.connect(partnerId);
+                        conn.on('open', () => {
+                            setStatus('connected');
+                            setConn(conn);
+                            clearTimeout(timer);
+                        });
+                        conn.on('data', (data) => {
+                            if(data.t === 'msg') setMsgs(p => [...p, data.d]);
+                            if(data.t === 'todo') setTodos(p => [...p, data.d]);
+                        });
+                        setConn(conn);
+                    });
                     
-                    mediaRecorderRef.current.onstop = () => {
-                        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
-                        setAudioBlob(blob);
-                        stream.getTracks().forEach(track => track.stop());
-                    };
-                    
-                    mediaRecorderRef.current.start();
-                    setIsRecording(true);
-                    setRecordingTime(0);
-                    
-                    timerRef.current = setInterval(() => {
-                        setRecordingTime(t => t + 1);
-                    }, 1000);
-                } catch (e) {
-                    showToast('无法访问麦克风...');
+                    peer.on('error', (err) => {
+                        console.error(err);
+                        clearTimeout(timer);
+                        setStatus('disconnected');
+                    });
+
+                } catch(e) {
+                    console.error(e);
+                    setStatus('disconnected');
                 }
             };
-            
-            const stopRecording = () => {
-                if (mediaRecorderRef.current && isRecording) {
-                    mediaRecorderRef.current.stop();
-                    setIsRecording(false);
-                    clearInterval(timerRef.current);
+
+            // 发送数据
+            const send = (t, d) => {
+                // 本地更新
+                if(t === 'msg') {
+                    setMsgs(p => [...p, {...d, self: true}]);
+                    localforage.setItem('y_msgs', [...msgs, {...d, self: true}]);
+                }
+                if(t === 'todo') {
+                    setTodos(p => [...p, {...d, self: true}]);
+                    localforage.setItem('y_todos', [...todos, {...d, self: true}]);
+                }
+                // 发送给对方
+                if(conn && conn.open) {
+                    conn.send({t, d});
                 }
             };
-            
-            const saveRecording = () => {
-                if (audioBlob) {
-                    addVoiceMemo(audioBlob, recordingTime);
-                    setAudioBlob(null);
-                    setRecordingTime(0);
-                    showToast('声音已送达~');
-                }
-            };
-            
-            const formatTime = (s) => {
-                const mins = Math.floor(s / 60);
-                const secs = s % 60;
-                return `${mins}:${secs.toString().padStart(2, '0')}`;
-            };
-            
-            return (
-                <div className="flex flex-col items-center py-8">
-                    <motion.div
-                        animate={isRecording ? { scale: [1, 1.1, 1] } : {}}
-                        transition={{ duration: 1, repeat: Infinity }}
-                        className="relative"
-                    >
-                        {/* 录音水波纹 */}
-                        {isRecording && (
-                            <>
-                                <div className="record-ripple absolute inset-0"></div>
-                                <div className="record-ripple absolute inset-0" style={{ animationDelay: '0.5s' }}></div>
-                            </>
-                        )}
+
+            // --- 页面渲染 ---
+
+            if (page === 'init') return <div className="h-screen flex items-center justify-center text-gray-400">加载资源中...</div>;
+
+            // 登录页
+            if (page === 'login') {
+                return (
+                    <div className="h-screen flex flex-col items-center p-8 pt-20 bg-[#FDFBF7] relative">
+                        {/* 背景装饰 */}
+                        <div className="absolute top-[-20%] left-[-20%] w-[150%] h-[150%] bg-gradient-to-br from-[#E8CFC8] to-[#D4E4E6] rounded-full blur-[100px] opacity-30 pointer-events-none"></div>
                         
-                        <button
-                            onClick={isRecording ? stopRecording : startRecording}
-                            className={`w-20 h-20 rounded-full flex items-center justify-center text-3xl transition-all duration-300
-                                ${isRecording ? 'bg-coco-heart text-white' : 'bg-coco-pink text-white'} 
-                                jelly shadow-lg`}
-                        >
-                            {isRecording ? '⏹' : '🎙️'}
-                        </button>
-                    </motion.div>
-                    
-                    <div className="mt-4 text-center">
-                        <div className={`text-2xl font-hand ${isRecording ? 'text-coco-heart' : 'text-coco-muted'}`}>
-                            {isRecording ? formatTime(recordingTime) : '按住录音'}
-                        </div>
-                        
-                        {audioBlob && (
-                            <motion.div
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="mt-4 flex items-center gap-3"
-                            >
-                                <audio src={URL.createObjectURL(audioBlob)} controls className="h-8" />
-                                <button
-                                    onClick={saveRecording}
-                                    className="px-4 py-2 bg-coco-pink rounded-full text-white text-sm jelly"
-                                >
-                                    发送
-                                </button>
-                                <button
-                                    onClick={() => setAudioBlob(null)}
-                                    className="px-4 py-2 bg-gray-200 rounded-full text-coco-text text-sm jelly"
-                                >
-                                    取消
-                                </button>
-                            </motion.div>
+                        <h1 className="text-5xl font-bold text-[#4A403A] mb-2 anim-pop" style={{fontFamily: 'Nunito'}}>Yike</h1>
+                        <p className="text-gray-500 mb-12 text-sm">情侣的数字秘密小窝</p>
+
+                        {!myCode ? (
+                            <div className="w-full space-y-4 anim-slide">
+                                <button onClick={() => {
+                                    const code = 'yike_' + uid();
+                                    setMyCode(code);
+                                }} className="w-full py-4 bg-white shadow-lg rounded-2xl font-bold text-[#4A403A] active:scale-95 transition-transform">创建小窝 (生成暗号)</button>
+                                <button onClick={() => setMyCode('JOIN_MODE')} className="w-full py-4 bg-[#E8CFC8] text-white shadow-lg rounded-2xl font-bold active:scale-95 transition-transform">输入暗号来找 TA</button>
+                            </div>
+                        ) : myCode === 'JOIN_MODE' ? (
+                            <div className="w-full space-y-4 anim-slide">
+                                <input value={inputCode} onChange={e=>setInputCode(e.target.value)} placeholder="输入对方暗号" className="w-full p-4 bg-white rounded-2xl outline-none text-center font-mono text-lg" />
+                                <button onClick={() => {
+                                    if(!inputCode) return alert('请输入暗号');
+                                    localStorage.setItem('y_me', 'yike_' + uid());
+                                    localStorage.setItem('y_partner', inputCode);
+                                    window.location.reload();
+                                }} className="w-full py-4 bg-[#E8CFC8] text-white shadow-lg rounded-2xl font-bold active:scale-95">牵手</button>
+                                <button onClick={() => setMyCode('')} className="text-gray-400 text-sm mt-2">返回</button>
+                            </div>
+                        ) : (
+                            <div className="w-full text-center anim-slide">
+                                <div className="bg-white/80 p-6 rounded-2xl mb-6 shadow-sm backdrop-blur">
+                                    <p className="text-xs text-gray-400 mb-2">分享给 TA 的暗号 (点击复制)</p>
+                                    <div onClick={() => {navigator.clipboard.writeText(myCode); alert('已复制')}} className="text-xl font-mono font-bold text-[#E8CFC8] select-all cursor-pointer">{myCode}</div>
+                                </div>
+                                <p className="text-sm text-gray-500 animate-pulse">等待 TA 输入暗号连接...</p>
+                                <button onClick={() => {
+                                    localStorage.setItem('y_me', myCode);
+                                    localStorage.setItem('y_partner', '');
+                                    alert("已保存为本地记录，下次打开将直接进入。TA 连接时会自动绑定。");
+                                    setPage('home');
+                                    connectPeer(myCode, '');
+                                }} className="mt-8 text-xs text-gray-400 underline">先跳过，自己先用用</button>
+                            </div>
                         )}
                     </div>
-                    
-                    <p className="text-xs text-coco-muted mt-4">长按开始录音</p>
-                </div>
-            );
-        };
-        
-        // 语音消息卡片
-        const VoiceMemoCard = ({ memo }) => {
-            const [isPlaying, setIsPlaying] = useState(false);
-            const audioRef = useRef(null);
-            
-            const togglePlay = () => {
-                if (audioRef.current) {
-                    if (isPlaying) {
-                        audioRef.current.pause();
-                    } else {
-                        audioRef.current.play();
-                    }
-                    setIsPlaying(!isPlaying);
-                }
-            };
-            
+                );
+            }
+
+            // 首页
+            const days = Math.floor((Date.now() - localStorage.getItem('y_start') * 1 || Date.now()) / 86400000);
+
             return (
-                <motion.div
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className="glass-card rounded-3xl p-4 mb-3"
-                >
-                    <div className="flex items-center gap-4">
-                        <button
-                            onClick={togglePlay}
-                            className="w-12 h-12 rounded-full bg-coco-pink flex items-center justify-center text-white jelly"
-                        >
-                            {isPlaying ? '⏸' : '▶️'}
-                        </button>
-                        
-                        <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                                <span className="text-sm font-medium text-coco-text">{memo.authorName}</span>
-                                <span className="text-xs text-coco-muted">{formatTime(memo.createdAt)}</span>
+                <div className="h-screen flex flex-col relative bg-[#FDFBF7]">
+                    {/* 背景 */}
+                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-[#E8CFC8] rounded-full blur-[80px] opacity-20"></div>
+                        <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#D4E4E6] rounded-full blur-[80px] opacity-20"></div>
+                    </div>
+
+                    {/* 顶部状态栏 */}
+                    <header className="p-6 flex justify-between items-end relative z-10">
+                        <div>
+                            <div className="flex items-center gap-2 mb-1">
+                                <div className={`w-2 h-2 rounded-full ${status === 'connected' ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                                <span className="text-xs text-gray-400">{status === 'connected' ? '在线' : '等待连接'}</span>
                             </div>
-                            
-                            {/* 简易波形 */}
-                            <div className="flex items-center gap-0.5 mt-2 h-6">
-                                {[...Array(20)].map((_, i) => (
-                                    <motion.div
-                                        key={i}
-                                        animate={isPlaying ? { height: [4, Math.random() * 16 + 4, 4] } : { height: 4 }}
-                                        transition={{ duration: 0.3, repeat: Infinity, delay: i * 0.05 }}
-                                        className="w-1 bg-coco-pink/60 rounded-full"
-                                    />
+                            <div className="text-2xl font-bold text-[#4A403A]" style={{fontFamily: 'Nunito'}}>
+                                Day <span className="text-[#E8CFC8]">{days}</span>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <div className="text-xs text-gray-400">在一起</div>
+                        </div>
+                    </header>
+
+                    {/* 内容区 */}
+                    <main className="flex-1 overflow-y-auto p-4 space-y-4 pb-24 relative z-0">
+                        {/* 树洞 Tab */}
+                        {tab === 'msg' && (
+                            <div className="space-y-4">
+                                {msgs.map(m => (
+                                    <div key={m.id} className={`flex ${m.self ? 'justify-end' : 'justify-start'} anim-slide`}>
+                                        <div className={`max-w-[80%] p-3 rounded-2xl text-sm ${m.self ? 'bg-[#E8CFC8] text-white rounded-br-none' : 'bg-white text-gray-700 rounded-bl-none shadow-sm'}`}>
+                                            {m.text}
+                                            <div className={`text-[10px] mt-1 opacity-60 text-right`}>{time(m.ts)}</div>
+                                        </div>
+                                    </div>
                                 ))}
                             </div>
-                        </div>
-                        
-                        <audio
-                            ref={audioRef}
-                            src={memo.audio}
-                            onEnded={() => setIsPlaying(false)}
-                        />
-                        
-                        <span className="text-xs text-coco-muted">
-                            {Math.floor(memo.duration / 60)}:{String(memo.duration % 60).padStart(2, '0')}
-                        </span>
-                    </div>
-                </motion.div>
-            );
-        };
-        
-        // 侧边栏
-        const Sidebar = ({ isOpen, onClose }) => {
-            const { exportData, importData, user, partner, loveStartDate, setNotifications, notifications } = useContext(AppContext);
-            const fileInputRef = useRef(null);
-            
-            const handleImport = (e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                    importData(file);
-                }
-            };
-            
-            return (
-                <AnimatePresence>
-                    {isOpen && (
-                        <>
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                onClick={onClose}
-                                className="fixed inset-0 bg-black/20 z-40"
-                            />
-                            <motion.div
-                                initial={{ x: '100%' }}
-                                animate={{ x: 0 }}
-                                exit={{ x: '100%' }}
-                                transition={{ type: 'spring', damping: 25 }}
-                                className="fixed right-0 top-0 bottom-0 w-72 bg-[#FDFBF7] z-50 shadow-2xl p-6 overflow-y-auto"
-                            >
-                                <div className="flex justify-between items-center mb-8">
-                                    <h2 className="text-xl font-hand text-coco-text">回忆保险箱</h2>
-                                    <button onClick={onClose} className="text-coco-muted text-2xl jelly">×</button>
-                                </div>
-                                
-                                <div className="space-y-6">
-                                    {/* 统计卡片 */}
-                                    <div className="glass-card rounded-2xl p-4">
-                                        <h3 className="text-sm font-medium text-coco-muted mb-3">我们的时光</h3>
-                                        <div className="text-3xl font-hand text-coco-pink">
-                                            {loveStartDate ? calculateLoveDays(loveStartDate) : 0} 天
-                                        </div>
-                                        <p className="text-xs text-coco-muted mt-1">
-                                            从 {loveStartDate ? formatDate(loveStartDate) : '...'} 开始
-                                        </p>
+                        )}
+
+                        {/* 待办 Tab */}
+                        {tab === 'todo' && (
+                            <div className="space-y-3">
+                                {todos.map((t, i) => (
+                                    <div key={i} className="bg-white p-3 rounded-xl flex items-center gap-3 shadow-sm anim-slide">
+                                        <div className={`w-5 h-5 rounded-full border ${t.done ? 'bg-[#D4E4E6] border-[#D4E4E6]' : 'border-gray-300'}`}></div>
+                                        <span className={`flex-1 text-sm ${t.done ? 'line-through text-gray-400' : 'text-gray-700'}`}>{t.text}</span>
                                     </div>
-                                    
-                                    {/* 提示音设置 */}
-                                    <div className="glass-card rounded-2xl p-4">
-                                        <h3 className="text-sm font-medium text-coco-muted mb-3">专属提示音</h3>
-                                        <label className="flex items-center gap-3">
-                                            <input
-                                                type="checkbox"
-                                                checked={notifications.soundEnabled}
-                                                onChange={(e) => setNotifications(prev => ({ ...prev, soundEnabled: e.target.checked }))}
-                                                className="w-5 h-5 rounded-full accent-coco-pink"
-                                            />
-                                            <span className="text-sm text-coco-text">收到消息时播放提示音</span>
-                                        </label>
-                                    </div>
-                                    
-                                    {/* 数据管理 */}
-                                    <div className="space-y-3">
-                                        <button
-                                            onClick={exportData}
-                                            className="w-full py-3 bg-coco-pink/20 rounded-xl text-coco-text text-sm jelly"
-                                        >
-                                            📦 打包回忆（导出）
-                                        </button>
-                                        <button
-                                            onClick={() => fileInputRef.current?.click()}
-                                            className="w-full py-3 bg-coco-blue/30 rounded-xl text-coco-text text-sm jelly"
-                                        >
-                                            📥 恢复时光（导入）
-                                        </button>
-                                        <input
-                                            ref={fileInputRef}
-                                            type="file"
-                                            accept=".json"
-                                            onChange={handleImport}
-                                            className="hidden"
-                                        />
-                                    </div>
-                                    
-                                    {/* 关于 */}
-                                    <div className="pt-6 border-t border-gray-200">
-                                        <p className="text-xs text-coco-muted text-center">
-                                            伊可 Yike v1.0<br/>
-                                            用爱编织的数字小窝
-                                        </p>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        </>
-                    )}
-                </AnimatePresence>
-            );
-        };
-        
-        // 主页
-        const HomePage = () => {
-            const { 
-                user, partner, connectionStatus, 
-                treeholes, todos, voiceMemos, 
-                loveStartDate, addTreehole, addTodo,
-                showToast 
-            } = useContext(AppContext);
-            
-            const [activeTab, setActiveTab] = useState('treehole'); // treehole, todo, voice
-            const [showSidebar, setShowSidebar] = useState(false);
-            const [newTreehole, setNewTreehole] = useState('');
-            const [isAnonymous, setIsAnonymous] = useState(false);
-            const [showTodoInput, setShowTodoInput] = useState(false);
-            const [newTodo, setNewTodo] = useState('');
-            const [todoCategory, setTodoCategory] = useState('partner');
-            const treeholeInputRef = useRef(null);
-            
-            const handleSubmitTreehole = () => {
-                if (newTreehole.trim()) {
-                    addTreehole(newTreehole, isAnonymous);
-                    setNewTreehole('');
-                    setIsAnonymous(false);
-                }
-            };
-            
-            const handleSubmitTodo = () => {
-                if (newTodo.trim()) {
-                    addTodo(newTodo, todoCategory);
-                    setNewTodo('');
-                    setShowTodoInput(false);
-                }
-            };
-            
-            const partnerTodos = todos.filter(t => t.category === 'partner' && !t.completed);
-            const togetherTodos = todos.filter(t => t.category === 'together' && !t.completed);
-            const completedTodos = todos.filter(t => t.completed);
-            
-            return (
-                <div className="h-full flex flex-col bg-[#FDFBF7]">
-                    {/* 动态背景光斑 */}
-                    <div className="fixed inset-0 overflow-hidden pointer-events-none">
-                        <div className="absolute top-0 left-0 w-64 h-64 bg-coco-pink/20 rounded-full blur-[100px] animate-float"></div>
-                        <div className="absolute bottom-0 right-0 w-72 h-72 bg-coco-blue/20 rounded-full blur-[100px] animate-float" style={{ animationDelay: '3s' }}></div>
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-100/20 rounded-full blur-[120px] animate-float" style={{ animationDelay: '1.5s' }}></div>
-                    </div>
-                    
-                    {/* 顶部栏 */}
-                    <div className="relative z-10 px-5 py-4 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-coco-pink/30 flex items-center justify-center">
-                                <span className="text-sm">👫</span>
+                                ))}
                             </div>
-                            <div>
-                                <h1 className="text-lg font-medium text-coco-text">
-                                    {partner?.name || 'TA'}
-                                </h1>
-                                <BreathingIndicator isOnline={connectionStatus === 'connected'} />
-                            </div>
-                        </div>
-                        
-                        <button
-                            onClick={() => setShowSidebar(true)}
-                            className="p-2 rounded-full bg-white/50 jelly"
-                        >
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-coco-text">
-                                <path d="M3 12h.01M3 6h.01M3 18h.01M21 12h.01M21 6h.01M21 18h.01M12 3v.01M12 6v.01M12 18v.01"/>
-                            </svg>
-                        </button>
-                    </div>
-                    
-                    {/* 恋爱天数大标题 */}
-                    <div className="relative z-10 px-5 mb-4">
-                        <div className="glass-card rounded-3xl p-6 text-center">
-                            <p className="text-sm text-coco-muted mb-1">我们在一起</p>
-                            <p className="text-5xl font-hand text-coco-text">
-                                {loveStartDate ? calculateLoveDays(loveStartDate) : 0}
-                            </p>
-                            <p className="text-sm text-coco-muted mt-1">天 💕</p>
-                        </div>
-                    </div>
-                    
-                    {/* Tab 切换 */}
-                    <div className="relative z-10 px-5 mb-4">
-                        <div className="flex gap-2 p-1 bg-white/40 rounded-2xl">
-                            {[
-                                { id: 'treehole', icon: '🌳', label: '树洞' },
-                                { id: 'todo', icon: '📋', label: '待办' },
-                                { id: 'voice', icon: '🎙️', label: '语音' }
-                            ].map(tab => (
-                                <button
-                                    key={tab.id}
-                                    onClick={() => setActiveTab(tab.id)}
-                                    className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all duration-300
-                                        ${activeTab === tab.id 
-                                            ? 'bg-coco-pink text-white shadow-lg' 
-                                            : 'text-coco-muted hover:text-coco-text'}`}
-                                >
-                                    {tab.icon} {tab.label}
+                        )}
+                    </main>
+
+                    {/* 输入区域 (仅树洞) */}
+                    {tab === 'msg' && (
+                        <div className="fixed bottom-24 left-4 right-4 z-20">
+                            <div className="bg-white/80 backdrop-blur p-2 rounded-full flex items-center shadow-lg">
+                                <input id="msgInput" className="flex-1 bg-transparent px-4 py-2 outline-none text-sm" placeholder="说点什么..." onKeyDown={e => {
+                                    if(e.key === 'Enter') {
+                                        const val = e.target.value;
+                                        if(!val) return;
+                                        send('msg', {id: Date.now(), text: val, ts: Date.now()});
+                                        e.target.value = '';
+                                    }
+                                }}/>
+                                <button className="w-10 h-10 rounded-full bg-[#E8CFC8] text-white flex items-center justify-center active:scale-90 transition-transform" onClick={() => {
+                                    const input = document.getElementById('msgInput');
+                                    const val = input.value;
+                                    if(!val) return;
+                                    send('msg', {id: Date.now(), text: val, ts: Date.now()});
+                                    input.value = '';
+                                }}>
+                                    <Icon.Send />
                                 </button>
-                            ))}
+                            </div>
                         </div>
-                    </div>
-                    
-                    {/* 内容区 */}
-                    <div className="relative z-10 flex-1 overflow-y-auto px-5 pb-24">
-                        <AnimatePresence mode="wait">
-                            
-                            {/* 树洞 Tab */}
-                            {activeTab === 'treehole' && (
-                                <motion.div
-                                    key="treehole"
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -20 }}
-                                >
-                                    {/* 输入框 */}
-                                    <div className="glass-card rounded-3xl p-4 mb-4">
-                                        <textarea
-                                            ref={treeholeInputRef}
-                                            value={newTreehole}
-                                            onChange={(e) => setNewTreehole(e.target.value)}
-                                            placeholder="在这里写下想对 TA 说的话..."
-                                            className="w-full resize-none text-sm text-coco-text placeholder-coco-muted bg-transparent focus:outline-none"
-                                            rows={2}
-                                        />
-                                        <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
-                                            <label className="flex items-center gap-2 text-sm text-coco-muted cursor-pointer">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={isAnonymous}
-                                                    onChange={(e) => setIsAnonymous(e.target.checked)}
-                                                    className="w-4 h-4 rounded accent-coco-pink"
-                                                />
-                                                <span className={isAnonymous ? 'text-coco-pink' : ''}>🎭 匿名</span>
-                                            </label>
-                                            <button
-                                                onClick={handleSubmitTreehole}
-                                                className="px-4 py-2 bg-coco-pink rounded-xl text-white text-sm jelly"
-                                            >
-                                                投递
-                                            </button>
-                                        </div>
-                                    </div>
-                                    
-                                    {/* 树洞列表 */}
-                                    {treeholes.length === 0 ? (
-                                        <motion.div
-                                            initial={{ scale: 0.9, opacity: 0 }}
-                                            animate={{ scale: 1, opacity: 1 }}
-                                            className="text-center py-12"
-                                        >
-                                            <svg width="80" height="60" viewBox="0 0 80 60" className="mailbox-draw mx-auto mb-4">
-                                                <path d="M10 60 L10 20 Q10 10 20 10 L60 10 Q70 10 70 20 L70 60"/>
-                                                <rect x="30" y="35" width="20" height="25" rx="2"/>
-                                                <path d="M15 60 L25 50 M65 60 L55 50"/>
-                                            </svg>
-                                            <p className="text-coco-muted">这里还没塞进心事</p>
-                                            <p className="text-sm text-coco-muted">快去种下第一颗种子吧 🌱</p>
-                                        </motion.div>
-                                    ) : (
-                                        <div className="space-y-1">
-                                            <AnimatePresence>
-                                                {treeholes.map((treehole, i) => (
-                                                    <motion.div
-                                                        key={treehole.id}
-                                                        initial={{ y: 20, opacity: 0 }}
-                                                        animate={{ y: 0, opacity: 1 }}
-                                                        transition={{ delay: i * 0.05 }}
-                                                    >
-                                                        <TreeholeCard treehole={treehole} />
-                                                    </motion.div>
-                                                ))}
-                                            </AnimatePresence>
-                                        </div>
-                                    )}
-                                </motion.div>
-                            )}
-                            
-                            {/* 待办 Tab */}
-                            {activeTab === 'todo' && (
-                                <motion.div
-                                    key="todo"
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -20 }}
-                                    className="space-y-6"
-                                >
-                                    {/* TA 身边的小事 */}
-                                    <div>
-                                        <h3 className="text-sm font-medium text-coco-text mb-3 flex items-center gap-2">
-                                            <span>🫂</span> TA 身边的小事
-                                        </h3>
-                                        {partnerTodos.length === 0 ? (
-                                            <p className="text-sm text-coco-muted text-center py-4 bg-white/30 rounded-xl">
-                                                还没有想帮 TA 完成的事呢 💭
-                                            </p>
-                                        ) : (
-                                            partnerTodos.map(todo => <TodoCard key={todo.id} todo={todo} />)
-                                        )}
-                                    </div>
-                                    
-                                    {/* 一起完成的成就 */}
-                                    <div>
-                                        <h3 className="text-sm font-medium text-coco-text mb-3 flex items-center gap-2">
-                                            <span>🌟</span> 一起完成的成就
-                                        </h3>
-                                        {togetherTodos.length === 0 ? (
-                                            <p className="text-sm text-coco-muted text-center py-4 bg-white/30 rounded-xl">
-                                                还没有共同的里程碑呢 ✨
-                                            </p>
-                                        ) : (
-                                            togetherTodos.map(todo => <TodoCard key={todo.id} todo={todo} />)
-                                        )}
-                                    </div>
-                                    
-                                    {/* 添加待办 */}
-                                    {!showTodoInput ? (
-                                        <button
-                                            onClick={() => setShowTodoInput(true)}
-                                            className="w-full py-3 border-2 border-dashed border-coco-pink/30 rounded-xl text-coco-pink text-sm jelly"
-                                        >
-                                            + 添加新的期待
-                                        </button>
-                                    ) : (
-                                        <motion.div
-                                            initial={{ opacity: 0, height: 0 }}
-                                            animate={{ opacity: 1, height: 'auto' }}
-                                            className="glass-card rounded-3xl p-4"
-                                        >
-                                            <input
-                                                type="text"
-                                                value={newTodo}
-                                                onChange={(e) => setNewTodo(e.target.value)}
-                                                placeholder="写下新的期待..."
-                                                className="w-full p-3 bg-white/50 rounded-xl text-sm mb-3 focus:outline-none"
-                                                autoFocus
-                                            />
-                                            <div className="flex gap-2 mb-3">
-                                                <button
-                                                    onClick={() => setTodoCategory('partner')}
-                                                    className={`flex-1 py-2 rounded-xl text-sm transition-all duration-300
-                                                        ${todoCategory === 'partner' 
-                                                            ? 'bg-coco-pink/20 text-coco-text' 
-                                                            : 'bg-white/50 text-coco-muted'}`}
-                                                >
-                                                    🫂 TA 身边
-                                                </button>
-                                                <button
-                                                    onClick={() => setTodoCategory('together')}
-                                                    className={`flex-1 py-2 rounded-xl text-sm transition-all duration-300
-                                                        ${todoCategory === 'together' 
-                                                            ? 'bg-coco-pink/20 text-coco-text' 
-                                                            : 'bg-white/50 text-coco-muted'}`}
-                                                >
-                                                    🌟 一起完成
-                                                </button>
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <button
-                                                    onClick={() => setShowTodoInput(false)}
-                                                    className="flex-1 py-2 bg-gray-100 rounded-xl text-coco-text text-sm jelly"
-                                                >
-                                                    取消
-                                                </button>
-                                                <button
-                                                    onClick={handleSubmitTodo}
-                                                    className="flex-1 py-2 bg-coco-pink rounded-xl text-white text-sm jelly"
-                                                >
-                                                    添加
-                                                </button>
-                                            </div>
-                                        </motion.div>
-                                    )}
-                                    
-                                    {/* 已完成 */}
-                                    {completedTodos.length > 0 && (
-                                        <div className="pt-4 border-t border-gray-200">
-                                            <h3 className="text-sm font-medium text-coco-muted mb-3 flex items-center gap-2">
-                                                <span>✅</span> 已完成 ({completedTodos.length})
-                                            </h3>
-                                            <div className="opacity-50">
-                                                {completedTodos.slice(0, 3).map(todo => (
-                                                    <TodoCard key={todo.id} todo={todo} />
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                </motion.div>
-                            )}
-                            
-                            {/* 语音 Tab */}
-                            {activeTab === 'voice' && (
-                                <motion.div
-                                    key="voice"
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -20 }}
-                                >
-                                    <VoiceRecorder />
-                                    
-                                    {voiceMemos.length > 0 ? (
-                                        <div className="mt-8 space-y-3">
-                                            <h3 className="text-sm font-medium text-coco-muted mb-3">收到的声音</h3>
-                                            {voiceMemos.map(memo => (
-                                                <VoiceMemoCard key={memo.id} memo={memo} />
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <motion.div
-                                            initial={{ scale: 0.9, opacity: 0 }}
-                                            animate={{ scale: 1, opacity: 1 }}
-                                            className="text-center py-12"
-                                        >
-                                            <span className="text-4xl mb-4 block">🔇</span>
-                                            <p className="text-coco-muted">还没有声音</p>
-                                            <p className="text-sm text-coco-muted">按住麦克风 tell 你的 TA 💕</p>
-                                        </motion.div>
-                                    )}
-                                </motion.div>
-                            )}
-                            
-                        </AnimatePresence>
-                    </div>
-                    
-                    {/* Toast 容器 */}
-                    <div className="fixed top-0 left-0 right-0 z-50 flex flex-col items-center pointer-events-none">
-                        <AnimatePresence>
-                            {toasts.map(toast => (
-                                <Toast key={toast.id} message={toast.message} />
-                            ))}
-                        </AnimatePresence>
-                    </div>
-                    
-                    {/* 侧边栏 */}
-                    <Sidebar isOpen={showSidebar} onClose={() => setShowSidebar(false)} />
-                </div>
-            );
-        };
-        
-        // 主应用
-        const App = () => {
-            const { user, connectionStatus, loveStartDate } = useContext(AppContext);
-            const [isReady, setIsReady] = useState(false);
-            
-            useEffect(() => {
-                // 延迟初始化，避免闪烁
-                const timer = setTimeout(() => setIsReady(true), 100);
-                return () => clearTimeout(timer);
-            }, []);
-            
-            if (!isReady) {
-                return (
-                    <div className="h-screen flex items-center justify-center bg-[#FDFBF7]">
-                        <div className="text-center">
-                            <div className="text-4xl mb-4 animate-bounce">🏠</div>
-                            <p className="text-coco-muted">正在搭建小窝...</p>
-                        </div>
-                    </div>
-                );
-            }
-            
-            // 如果还没有配对信息，显示引导页
-            if (!user) {
-                return <OnboardingPage />;
-            }
-            
-            // 如果配对成功但还在连接中，显示轻量连接状态
-            return (
-                <div className="h-screen flex flex-col">
-                    {connectionStatus === 'disconnected' && (
-                        <motion.div
-                            initial={{ y: -50, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            className="bg-yellow-50 px-4 py-2 text-center text-sm text-yellow-700"
-                        >
-                            哎呀，与 TA 暂时走散了，正在努力重新牵手...
-                        </motion.div>
                     )}
-                    <div className="flex-1 overflow-hidden">
-                        <HomePage />
-                    </div>
+
+                    {/* 待办添加区 (仅待办) */}
+                    {tab === 'todo' && (
+                        <div className="fixed bottom-24 left-4 right-4 z-20 flex gap-2">
+                             <input id="todoInput" className="flex-1 bg-white p-3 rounded-xl outline-none text-sm shadow-sm" placeholder="添加任务..." onKeyDown={e => {
+                                    if(e.key === 'Enter') {
+                                        const val = e.target.value;
+                                        if(!val) return;
+                                        send('todo', {text: val, done: false});
+                                        e.target.value = '';
+                                    }
+                                }}/>
+                             <button className="bg-[#D4E4E6] p-3 rounded-xl text-white active:scale-90" onClick={() => {
+                                 const input = document.getElementById('todoInput');
+                                 if(!input.value) return;
+                                 send('todo', {text: input.value, done: false});
+                                 input.value = '';
+                             }}>+</button>
+                        </div>
+                    )}
+
+                    {/* 底部导航 */}
+                    <nav className="absolute bottom-6 left-6 right-6 z-30">
+                        <div className="bg-white/60 backdrop-blur-md p-2 rounded-full flex justify-between items-center shadow-xl border border-white/50">
+                            <button onClick={() => setTab('msg')} className={`flex-1 py-3 rounded-full flex justify-center ${tab==='msg'?'bg-white shadow-sm text-[#E8CFC8]':'text-gray-400'}`}>
+                                <Icon.Msg />
+                            </button>
+                            <button className="w-12 h-12 rounded-full bg-[#FDFBF7] flex items-center justify-center shadow-md -mt-2 border border-white">
+                                <div className="w-2 h-2 rounded-full bg-[#E8CFC8]"></div>
+                            </button>
+                            <button onClick={() => setTab('todo')} className={`flex-1 py-3 rounded-full flex justify-center ${tab==='todo'?'bg-white shadow-sm text-[#D4E4E6]':'text-gray-400'}`}>
+                                <Icon.List />
+                            </button>
+                        </div>
+                    </nav>
                 </div>
             );
-        };
-        
-        // 根组件
-        const Root = () => (
-            <AppProvider>
-                <App />
-            </AppProvider>
-        );
-        
+        }
+
         // 渲染
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<Root />);
-    </script>
-    
-    <script>
-        // Service Worker for PWA
-        if ('serviceWorker' in navigator) {
-            // 暂时不注册 SW，因为这是纯静态文件
-        }
-        
-        // PWA 样式注入
-        document.addEventListener('DOMContentLoaded', () => {
-            // 添加 iOS 样式
-            const style = document.createElement('style');
-            style.textContent = `
-                /* iOS 适配 */
-                @supports (-webkit-touch-callout: none) {
-                    body {
-                        min-height: -webkit-fill-available;
-                    }
-                }
-                
-                /* 安全区域适配 */
-                .safe-area-bottom {
-                    padding-bottom: env(safe-area-inset-bottom, 20px);
-                }
-            `;
-            document.head.appendChild(style);
-        });
+        root.render(<App />);
     </script>
 </body>
 </html>
