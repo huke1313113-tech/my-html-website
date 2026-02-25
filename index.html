@@ -6,6 +6,7 @@
     <title>伊可 Yike | 情侣小窝</title>
     
     <!-- 字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Tailwind CSS -->
@@ -34,6 +35,17 @@
                         homeBg: '#FDFBF7',
                         treeholeBg: '#FAF5F0',
                         todoBg: '#F5F7F5',
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'float': 'float 3s ease-in-out infinite',
+                        'pulse-soft': 'pulse 3s ease-in-out infinite',
+                        'slide-up': 'slideUp 0.4s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
+                        slideUp: { '0%': { transform: 'translateY(20px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } },
                     }
                 }
             }
@@ -54,13 +66,17 @@
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        /* 录音动画 */
-        .recording-wave { animation: wave 1s ease-in-out infinite; }
-        @keyframes wave { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(1.5); } }
+        /* 录音波形动画 */
+        .recording-wave { animation: wave 0.8s ease-in-out infinite; }
+        @keyframes wave { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(1.6); } }
         
         /* 心跳动画 */
         @keyframes heartbeat { 0%, 100% { transform: scale(1); } 14% { transform: scale(1.1); } 28% { transform: scale(1); } 42% { transform: scale(1.1); } 70% { transform: scale(1); } }
         .heartbeat { animation: heartbeat 1.5s ease-in-out infinite; }
+
+        /* 连接中旋转 */
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .spin { animation: spin 1s linear infinite; }
     </style>
 </head>
 <body>
@@ -111,9 +127,9 @@
             Copy: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>,
             Play: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>,
             Delete: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>,
-            Star: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
             Refresh: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>,
             FileAudio: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>,
+            Wifi: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>,
         };
 
         // ================= 主应用 =================
@@ -122,6 +138,7 @@
             const [tab, setTab] = useState('home');
             const [showSettings, setShowSettings] = useState(false);
             const [toast, setToast] = useState(null);
+            const [loadingProgress, setLoadingProgress] = useState('正在初始化...');
             
             // 数据
             const [myId, setMyId] = useState('');
@@ -134,133 +151,175 @@
             const [connStatus, setConnStatus] = useState('disconnected');
             const [conn, setConn] = useState(null);
             const peerRef = useRef(null);
-            const retryTimerRef = useRef(null);
-            const initDoneRef = useRef(false);
+            const reconnectTimerRef = useRef(null);
 
-            // 初始化
+            // 初始化 - 分离为多个步骤
             useEffect(() => {
-                const init = async () => {
-                    if (initDoneRef.current) return;
+                let mounted = true;
+                
+                const initApp = async () => {
+                    if (!mounted) return;
+                    setLoadingProgress('读取本地数据...');
                     
+                    // 步骤1: 读取本地存储
                     let savedMyId = localStorage.getItem('yike_myId');
                     const savedPartner = localStorage.getItem('yike_partnerId');
                     const savedAnniversary = localStorage.getItem('yike_anniversary');
                     
                     if (savedAnniversary) setAnniversary(Number(savedAnniversary));
                     
-                    const msgs = await localforage.getItem('yike_msgs') || [];
-                    const todos = await localforage.getItem('yike_todos') || [];
-                    setMessages(msgs);
-                    setTodos(todos);
+                    // 步骤2: 异步读取 IndexedDB（不阻塞主线程）
+                    const loadData = async () => {
+                        const msgs = await localforage.getItem('yike_msgs') || [];
+                        const todos = await localforage.getItem('yike_todos') || [];
+                        return { msgs, todos };
+                    };
+                    
+                    // 延迟执行，让出主线程
+                    await new Promise(r => setTimeout(r, 100));
+                    if (!mounted) return;
+                    
+                    const data = await loadData();
+                    if (!mounted) return;
+                    
+                    setMessages(data.msgs);
+                    setTodos(data.todos);
+                    
+                    // 步骤3: 确定入口
+                    setLoadingProgress('检查连接状态...');
+                    await new Promise(r => setTimeout(r, 100));
+                    if (!mounted) return;
 
-                    if (savedMyId && savedPartner) {
-                        setMyId(savedMyId);
-                        setPartnerId(savedPartner);
-                        setView('home');
-                        initPeer(savedMyId, savedPartner);
-                    } else if (!savedMyId) {
+                    if (!savedMyId) {
+                        // 首次使用，生成ID
                         savedMyId = generateId();
                         localStorage.setItem('yike_myId', savedMyId);
+                        if (!mounted) return;
                         setMyId(savedMyId);
                         setView('login');
                     } else {
+                        // 有记录，直接进入
                         setMyId(savedMyId);
-                        setView('login');
+                        if (savedPartner) {
+                            setPartnerId(savedPartner);
+                            setView('home');
+                            // 后台初始化连接
+                            setTimeout(() => initPeer(savedMyId, savedPartner), 500);
+                        } else {
+                            setView('login');
+                        }
                     }
-                    
-                    initDoneRef.current = true;
                 };
-                
-                setTimeout(init, 300);
+
+                initApp();
                 
                 return () => {
-                    if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+                    mounted = false;
+                    if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
                     if (peerRef.current) peerRef.current.destroy();
                 };
             }, []);
 
-            // PeerJS 连接逻辑
-            const initPeer = useCallback((id, pid) => {
+            // PeerJS 连接逻辑 - 更稳定
+            const initPeer = useCallback((id, pid, forceReconnect = false) => {
+                if (!forceReconnect && (connStatus === 'connected' || connStatus === 'connecting')) {
+                    console.log('Already connected or connecting, skip');
+                    return;
+                }
+                
+                // 清理旧连接
                 if (peerRef.current) {
                     try { peerRef.current.destroy(); } catch(e) {}
+                    peerRef.current = null;
                 }
-                if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+                if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
                 
                 setConnStatus('connecting');
                 console.log('Init Peer:', id, '->', pid);
 
-                const peer = new Peer(id, {
-                    debug: 0,
-                    config: {
-                        iceServers: [
-                            { urls: 'stun:stun.l.google.com:19302' },
-                            { urls: 'stun:stun1.l.google.com:19302' }
-                        ]
-                    }
-                });
-                peerRef.current = peer;
+                try {
+                    const peer = new Peer(id, {
+                        debug: 0,
+                        config: {
+                            iceServers: [
+                                { urls: 'stun:stun.l.google.com:19302' },
+                                { urls: 'stun:stun1.l.google.com:19302' },
+                                { urls: 'stun:stun2.l.google.com:19302' }
+                            ]
+                        }
+                    });
+                    peerRef.current = peer;
 
-                const checkTimeout = () => {
-                    if (connStatus === 'connecting') {
-                        console.log('Timeout, retrying connection...');
-                        if (pid && localStorage.getItem('yike_partnerId') === pid) {
-                            retryTimerRef.current = setTimeout(() => {
-                                initPeer(id, pid);
-                            }, 3000);
-                        } else {
+                    // 超时处理 - 8秒后判定失败
+                    const timeoutId = setTimeout(() => {
+                        if (peerRef.current === peer) {
                             setConnStatus('disconnected');
+                            console.log('Connection timeout');
                         }
-                    }
-                };
-                
-                const timeoutId = setTimeout(checkTimeout, 6000);
+                    }, 8000);
 
-                peer.on('open', (myPeerId) => {
-                    console.log('Peer open:', myPeerId);
-                    if (!pid) {
-                        setConnStatus('waiting');
-                    }
-                });
-
-                peer.on('connection', (c) => {
-                    clearTimeout(timeoutId);
-                    setupConnection(c);
-                });
-
-                peer.on('error', (err) => {
-                    console.error('Peer Error:', err);
-                    clearTimeout(timeoutId);
-                    
-                    if (err.type === 'peer-unavailable') {
-                        setConnStatus('disconnected');
-                        showToast('暗号无效或对方已离线');
-                    } else if (err.type === 'unavailable-id') {
-                        const newId = generateId();
-                        localStorage.setItem('yike_myId', newId);
-                        setMyId(newId);
-                        showToast('暗号更新，请重新分享');
-                        setTimeout(() => window.location.reload(), 1500);
-                    } else {
-                        setConnStatus('disconnected');
-                        if (pid) {
-                            retryTimerRef.current = setTimeout(() => initPeer(id, pid), 5000);
+                    peer.on('open', (myPeerId) => {
+                        console.log('Peer open:', myPeerId);
+                        clearTimeout(timeoutId);
+                        
+                        if (!pid) {
+                            // 创建者模式，等待连接
+                            setConnStatus('waiting');
                         }
-                    }
-                });
+                    });
 
-                if (pid) {
-                    const c = peer.connect(pid, { reliable: true });
-                    setupConnection(c);
+                    peer.on('connection', (connection) => {
+                        console.log('Incoming connection');
+                        clearTimeout(timeoutId);
+                        setupConnection(connection);
+                    });
+
+                    peer.on('error', (err) => {
+                        console.error('Peer Error:', err);
+                        clearTimeout(timeoutId);
+                        setConnStatus('disconnected');
+                        
+                        if (err.type === 'peer-unavailable') {
+                            showToast('暗号无效');
+                        } else if (err.type === 'unavailable-id') {
+                            // ID冲突，重新生成
+                            const newId = generateId();
+                            localStorage.setItem('yike_myId', newId);
+                            showToast('暗号已更新，请重新分享');
+                            setTimeout(() => window.location.reload(), 2000);
+                        } else if (err.type === 'network-disconnected') {
+                            showToast('网络断开');
+                        }
+                    });
+
+                    // 创建者不需要主动连接
+                    if (pid) {
+                        const connection = peer.connect(pid, { 
+                            reliable: true,
+                            serialization: 'json'
+                        });
+                        
+                        connection.on('open', () => {
+                            clearTimeout(timeoutId);
+                            setupConnection(connection);
+                        });
+                        
+                        connection.on('error', (err) => {
+                            console.error('Connection error:', err);
+                            clearTimeout(timeoutId);
+                        });
+                    }
+
+                } catch (e) {
+                    console.error('Peer init error:', e);
+                    setConnStatus('disconnected');
                 }
-            }, []);
+            }, [connStatus]);
 
             const setupConnection = (c) => {
-                c.on('open', () => {
-                    setConnStatus('connected');
-                    setConn(c);
-                    showToast('❤️ 连接成功');
-                    if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
-                });
+                setConn(c);
+                setConnStatus('connected');
+                showToast('❤️ 连接成功');
 
                 c.on('data', (data) => {
                     if (data.type === 'msg') {
@@ -286,11 +345,22 @@
                     setConnStatus('disconnected');
                     setConn(null);
                     showToast('连接已断开');
-                    const pid = localStorage.getItem('yike_partnerId');
-                    if (pid) {
-                        retryTimerRef.current = setTimeout(() => initPeer(myId, pid), 5000);
-                    }
                 });
+                
+                c.on('error', () => {
+                    setConnStatus('disconnected');
+                });
+            };
+
+            // 手动重连
+            const handleReconnect = () => {
+                const pid = localStorage.getItem('yike_partnerId');
+                if (pid) {
+                    showToast('正在重连...');
+                    initPeer(myId, pid, true);
+                } else {
+                    showToast('请先输入暗号');
+                }
             };
 
             // 发送数据
@@ -332,19 +402,24 @@
                 }
             };
 
+            // 加载页面
             if (view === 'loading') {
                 return (
-                    <div className={`h-full flex flex-col items-center justify-center ${getBgColor()}`}>
+                    <div className="h-full flex flex-col items-center justify-center bg-homeBg">
                         <div className="relative mb-6">
                             <div className="w-16 h-16 rounded-full bg-primary/20 animate-pulse flex items-center justify-center">
                                 <Icons.Heart className="w-8 h-8 text-primary heartbeat" />
                             </div>
                         </div>
-                        <p className="text-textLight">正在搭建小窝...</p>
+                        <div className="w-48 h-1 bg-gray-200 rounded-full overflow-hidden mb-3">
+                            <div className="h-full bg-primary animate-pulse" style={{width: '60%'}}></div>
+                        </div>
+                        <p className="text-textLight text-sm">{loadingProgress}</p>
                     </div>
                 );
             }
 
+            // 登录页
             if (view === 'login') return (
                 <LoginView 
                     myId={myId}
@@ -353,18 +428,14 @@
                         localStorage.setItem('yike_partnerId', pid);
                         setPartnerId(pid);
                         setView('home');
-                        initPeer(myId, pid);
+                        // 延迟初始化连接，让界面先显示
+                        setTimeout(() => initPeer(myId, pid), 300);
                     }}
-                    onRefresh={() => {
-                        const savedPartner = localStorage.getItem('yike_partnerId');
-                        if (savedPartner) {
-                            initPeer(myId, savedPartner);
-                            setView('home');
-                        }
-                    }}
+                    onRefresh={handleReconnect}
                 />
             );
 
+            // 首页
             const days = getDays(anniversary);
             const timelineData = useMemo(() => {
                 const m = messages.map(m => ({...m, kind: 'msg'}));
@@ -374,6 +445,7 @@
 
             return (
                 <div className={`h-full flex flex-col ${getBgColor()} relative overflow-hidden transition-colors duration-500`}>
+                    {/* 背景装饰 */}
                     <div className="absolute inset-0 pointer-events-none">
                         {tab === 'home' && (
                             <>
@@ -395,6 +467,7 @@
                         )}
                     </div>
 
+                    {/* 顶部栏 */}
                     <header className="relative z-10 px-6 pt-6 pb-3 flex justify-between items-center">
                         <div className="flex items-center gap-2">
                             <div className={`w-2.5 h-2.5 rounded-full transition-all duration-500 ${
@@ -404,14 +477,30 @@
                             <span className="text-xs font-medium text-textLight">
                                 {connStatus === 'connected' ? 'TA 在线' : 
                                  connStatus === 'connecting' ? '寻找中...' : 
-                                 connStatus === 'waiting' ? '等待牵手' : '已断开'}
+                                 connStatus === 'waiting' ? '等待牵手' : '离线'}
                             </span>
                         </div>
-                        <button onClick={() => setShowSettings(true)} className="p-2 rounded-full text-textLight hover:bg-white/60 transition-colors">
-                            <Icons.Setting className="w-5 h-5" />
-                        </button>
+                        <div className="flex items-center gap-2">
+                            {/* 重连按钮 */}
+                            {(connStatus === 'disconnected' || connStatus === 'failed') && (
+                                <button 
+                                    onClick={handleReconnect}
+                                    className="p-1.5 rounded-full bg-white/50 text-textLighter hover:text-primary transition-colors"
+                                    title="重新连接"
+                                >
+                                    <Icons.Refresh className="w-4 h-4" />
+                                </button>
+                            )}
+                            <button 
+                                onClick={() => setShowSettings(true)} 
+                                className="p-2 rounded-full text-textLight hover:bg-white/60 transition-colors"
+                            >
+                                <Icons.Setting className="w-5 h-5" />
+                            </button>
+                        </div>
                     </header>
 
+                    {/* 纪念日卡片 */}
                     <div className="px-6 pb-4 relative z-10">
                         <div className="glass rounded-3xl p-5 shadow-sm flex items-center justify-between">
                             <div>
@@ -428,11 +517,12 @@
                         </div>
                     </div>
 
+                    {/* 内容区 */}
                     <main className="flex-1 overflow-y-auto hide-scrollbar px-4 pb-28 relative z-0">
                         {tab === 'home' && (
                             <div className="space-y-3 pt-2">
                                 {timelineData.map((item, i) => (
-                                    <div key={i} className="animate-fade-in" style={{animationDelay: `${i * 0.03}s`}}>
+                                    <div key={i} className="animate-fade-in" style={{animationDelay: `${Math.min(i * 0.03, 0.3)}s`}}>
                                         {item.kind === 'msg' ? <MsgCard msg={item} /> : <TodoCardMini todo={item} />}
                                     </div>
                                 ))}
@@ -470,6 +560,7 @@
                         )}
                     </main>
 
+                    {/* 底部导航栏 */}
                     <nav className="absolute bottom-0 left-0 right-0 z-30 px-4 pb-4 pt-2">
                         <div className="glass rounded-2xl p-2 shadow-lg border border-white/60 flex justify-around items-center">
                             <NavBtn 
@@ -497,6 +588,7 @@
                         </div>
                     </nav>
 
+                    {/* 设置弹窗 */}
                     {showSettings && (
                         <SettingsView 
                             anniversary={anniversary} 
@@ -508,6 +600,7 @@
                         />
                     )}
 
+                    {/* Toast */}
                     {toast && (
                         <div className="fixed top-28 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur px-5 py-2.5 rounded-full shadow-lg text-sm font-bold text-text z-50 animate-fade-in">
                             {toast}
@@ -521,12 +614,15 @@
         function LoginView({ myId, connStatus, onJoin, onRefresh }) {
             const [mode, setMode] = useState(null);
             const [inputCode, setInputCode] = useState('');
+            const [copied, setCopied] = useState(false);
 
             const handleCopy = () => {
                 navigator.clipboard.writeText(myId);
-                alert('暗号已复制');
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
             };
 
+            // 显示结果页（创建后等待对方）
             if (mode === 'create' && myId) {
                 return (
                     <div className="h-full flex flex-col items-center justify-center bg-homeBg p-6 relative">
@@ -535,32 +631,48 @@
                         
                         <div className="w-full bg-white rounded-3xl p-6 text-center shadow-sm border border-primary/10 mb-6">
                             <div className="text-xs text-textLight mb-3 uppercase tracking-wider">分享暗号给 TA</div>
-                            <div onClick={handleCopy} className="group relative bg-yellowLight/50 p-4 rounded-xl cursor-pointer hover:bg-yellowLight transition-colors">
+                            <div 
+                                onClick={handleCopy}
+                                className="group relative bg-yellowLight/50 p-4 rounded-xl cursor-pointer hover:bg-yellowLight transition-colors active:scale-95"
+                            >
                                 <p className="text-lg font-mono font-bold text-text break-all select-all">{myId}</p>
-                                <div className="absolute top-2 right-2 text-textLighter opacity-0 group-hover:opacity-100">
-                                    <Icons.Copy className="w-4 h-4" />
+                                <div className="absolute top-2 right-2 text-textLighter">
+                                    {copied ? (
+                                        <span className="text-xs text-success">已复制!</span>
+                                    ) : (
+                                        <Icons.Copy className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    )}
                                 </div>
                             </div>
-                            <p className="text-xs text-textLighter mt-3">点击暗号复制</p>
+                            <p className="text-xs text-textLighter mt-3">点击暗号复制后发送给 TA</p>
                         </div>
                         
-                        <div className="flex items-center gap-2 text-sm text-textLight bg-white/60 px-4 py-2 rounded-full mb-4">
-                            <div className={`w-2 h-2 rounded-full ${connStatus === 'waiting' ? 'bg-yellow-400 animate-pulse' : 'bg-gray-300'}`}></div>
-                            {connStatus === 'waiting' ? '等待 TA 输入暗号...' : '等待中...'}
+                        {/* 状态显示 */}
+                        <div className="w-full mb-4">
+                            {connStatus === 'waiting' ? (
+                                <div className="flex items-center justify-center gap-2 text-sm text-textLight bg-white/60 px-4 py-3 rounded-full">
+                                    <div className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></div>
+                                    <span>等待 TA 输入暗号...</span>
+                                </div>
+                            ) : connStatus === 'connecting' ? (
+                                <div className="flex items-center justify-center gap-2 text-sm text-textLight bg-white/60 px-4 py-3 rounded-full">
+                                    <Icons.Refresh className="w-4 h-4 spin" />
+                                    <span>正在连接...</span>
+                                </div>
+                            ) : (
+                                <div className="flex items-center justify-center gap-2 text-sm text-textLight bg-white/60 px-4 py-3 rounded-full">
+                                    <div className="w-2 h-2 rounded-full bg-gray-300"></div>
+                                    <span>等待中... <button onClick={onRefresh} className="text-primary underline">刷新</button></span>
+                                </div>
+                            )}
                         </div>
                         
-                        <button 
-                            onClick={onRefresh}
-                            className="flex items-center gap-1 text-xs text-textLighter hover:text-text transition-colors"
-                        >
-                            <Icons.Refresh className="w-3 h-3" /> 刷新状态
-                        </button>
-                        
-                        <button onClick={() => setMode(null)} className="mt-6 text-sm text-textLighter hover:text-text">返回</button>
+                        <button onClick={() => setMode(null)} className="mt-4 text-sm text-textLighter hover:text-text transition-colors">返回</button>
                     </div>
                 );
             }
 
+            // 加入页
             if (mode === 'join') {
                 return (
                     <div className="h-full flex flex-col justify-center bg-treeholeBg p-6">
@@ -569,7 +681,7 @@
                             <div className="p-4 border-b border-gray-50">
                                 <input 
                                     className="w-full text-center text-lg font-mono outline-none bg-transparent placeholder-textLighter"
-                                    placeholder="粘贴 TA 发来的暗号"
+                                    placeholder="粘贴 TA 的暗号"
                                     value={inputCode}
                                     onChange={e => setInputCode(e.target.value)}
                                 />
@@ -577,7 +689,10 @@
                         </div>
                         <button 
                             onClick={() => {
-                                if (!inputCode.trim()) return alert('请输入暗号');
+                                if (!inputCode.trim()) {
+                                    alert('请输入暗号');
+                                    return;
+                                }
                                 onJoin(inputCode.trim());
                             }} 
                             className="mt-6 w-full py-4 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-primary/30 active:scale-95 transition-transform"
@@ -589,6 +704,7 @@
                 );
             }
 
+            // 选择页
             return (
                 <div className="h-full flex flex-col items-center justify-center bg-homeBg p-6">
                     <div className="mb-2 relative">
@@ -619,7 +735,7 @@
             );
         }
 
-        // ================= 树洞组件 - 修复语音功能 =================
+        // ================= 树洞组件 =================
         function TreeHoleView({ messages, onSend, connStatus, toast }) {
             const [text, setText] = useState('');
             const [isRecording, setIsRecording] = useState(false);
@@ -631,16 +747,12 @@
             const startRecording = async () => {
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorderRef.current = new MediaRecorder(stream, {
-                        mimeType: 'audio/webm;codecs=opus'
-                    });
+                    mediaRecorderRef.current = new MediaRecorder(stream);
                     
                     const chunks = [];
                     
                     mediaRecorderRef.current.ondataavailable = (e) => {
-                        if (e.data.size > 0) {
-                            chunks.push(e.data);
-                        }
+                        if (e.data.size > 0) chunks.push(e.data);
                     };
                     
                     mediaRecorderRef.current.onstop = () => {
@@ -653,10 +765,9 @@
                     setIsRecording(true);
                     setRecordingTime(0);
                     
-                    // 计时器
                     timerRef.current = setInterval(() => {
                         setRecordingTime(prev => {
-                            if (prev >= 30) { // 最多录30秒
+                            if (prev >= 30) {
                                 stopRecording();
                                 return 30;
                             }
@@ -666,7 +777,7 @@
                     
                 } catch (e) {
                     console.error('录音错误:', e);
-                    toast('无法访问麦克风，请检查权限或使用HTTPS');
+                    toast('无法访问麦克风，请检查权限');
                 }
             };
 
@@ -695,50 +806,47 @@
 
             const handleSend = () => {
                 if (audioBlob) {
-                    // 发送语音
                     const reader = new FileReader();
                     reader.onloadend = () => {
                         const base64Audio = reader.result;
-                        // 转换为WAV格式（更兼容）
-                        sendAudioMessage(base64Audio);
+                        // 发送语音
+                        const msg = {
+                            id: generateId(),
+                            text: '🎤 语音消息',
+                            audio: base64Audio,
+                            isAudio: true,
+                            ts: Date.now()
+                        };
+                        
+                        // 本地乐观更新
+                        messages.forEach((m, i) => {
+                            if (m.id === msg.id) return;
+                        });
+                        
+                        // 通过全局事件发送
+                        window.dispatchEvent(new CustomEvent('yike-send-msg', { detail: msg }));
+                        clearAudio();
                     };
                     reader.readAsDataURL(audioBlob);
                 } else if (text.trim()) {
-                    // 发送文字
                     onSend(text);
                     setText('');
                 }
             };
 
-            const sendAudioMessage = (base64Audio) => {
-                // 创建特殊的语音消息
-                const msg = {
-                    id: generateId(),
-                    text: '🎤 语音消息',
-                    audio: base64Audio,
-                    isAudio: true,
-                    ts: Date.now()
+            // 监听全局发送事件
+            useEffect(() => {
+                const handler = (e) => {
+                    // 本地添加消息
+                    setMessages(prev => {
+                        const newMsgs = [...prev, { ...e.detail, self: true }];
+                        localforage.setItem('yike_msgs', newMsgs);
+                        return newMsgs;
+                    });
                 };
-                
-                // 本地乐观更新
-                setMessages(prev => {
-                    const newMsgs = [...prev, { ...msg, self: true }];
-                    localforage.setItem('yike_msgs', newMsgs);
-                    return newMsgs;
-                });
-                
-                // 通过PeerJS发送（如果连接正常）
-                if (connStatus === 'connected') {
-                    // 语音数据较大，尝试发送
-                    try {
-                        window.dispatchEvent(new CustomEvent('yike-send-audio', { detail: msg }));
-                    } catch (e) {
-                        console.error('发送语音失败:', e);
-                    }
-                }
-                
-                clearAudio();
-            };
+                window.addEventListener('yike-send-msg', handler);
+                return () => window.removeEventListener('yike-send-msg', handler);
+            }, []);
 
             return (
                 <div className="flex flex-col h-full pb-24">
@@ -755,7 +863,7 @@
                     </div>
                     
                     <div className="fixed bottom-24 left-6 right-6 z-20">
-                        {/* 录音状态显示 */}
+                        {/* 录音状态 */}
                         {isRecording && (
                             <div className="mb-2 flex items-center justify-center gap-2 animate-fade-in">
                                 <div className="flex gap-1">
@@ -764,6 +872,12 @@
                                     <div className="w-2 h-8 rounded-full bg-danger recording-wave" style={{animationDelay: '0.4s'}}></div>
                                 </div>
                                 <span className="text-danger font-medium ml-2">{recordingTime}s</span>
+                                <button 
+                                    onClick={stopRecording}
+                                    className="ml-2 px-3 py-1 bg-danger text-white rounded-full text-xs"
+                                >
+                                    完成
+                                </button>
                             </div>
                         )}
 
@@ -806,7 +920,7 @@
                             
                             <input 
                                 className="flex-1 bg-transparent px-4 py-2 outline-none text-sm"
-                                placeholder={audioBlob ? '点击发送语音' : '说点什么...'}
+                                placeholder={audioBlob ? '点击发送' : '说点什么...'}
                                 value={text}
                                 onChange={e => setText(e.target.value)}
                                 onKeyDown={e => e.key === 'Enter' && handleSend()}
@@ -941,7 +1055,7 @@
             return (
                 <div className={`flex ${msg.self ? 'justify-end' : 'justify-start'}`}>
                     {msg.isAudio ? (
-                        // 语音消息卡片
+                        // 语音消息
                         <div className={`max-w-[80%] p-3 rounded-2xl shadow-sm ${
                             msg.self ? 'bg-primary text-white' : 'bg-white text-text'
                         }`}>
@@ -971,7 +1085,7 @@
                             </div>
                         </div>
                     ) : (
-                        // 文字消息卡片
+                        // 文字消息
                         <div className={`max-w-[82%] p-3.5 rounded-2xl shadow-sm text-sm leading-relaxed ${
                             msg.self 
                             ? 'bg-primary text-white rounded-br-sm' 
@@ -1029,7 +1143,7 @@
                                     value={date}
                                     onChange={e => setDate(e.target.value)}
                                 />
-                                <p className="text-xs text-textLighter">设置我们在一起的第一天，首页会显示相爱天数</p>
+                                <p className="text-xs text-textLighter">设置我们在一起的第一天</p>
                             </div>
                             
                             <button 
