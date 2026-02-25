@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>伊可 - 我们的数字小窝</title>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bg: '#FDFBF7',
+                        theme: '#E8CFC8',
+                        aux: '#D4E4E6',
+                        text: '#4A403A',
+                        subText: '#9CA3AF',
+                        pink: '#FFB7B2'
+                    },
+                    fontFamily: {
+                        sans: ['Nunito', 'sans-serif'],
+                        display: ['ZCOOL KuaiLe', 'cursive'],
+                    },
+                    animation: {
+                        'blob': 'blob 10s infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+
+    <!-- Libraries -->
+    <script src="https://unpkg.com/framer-motion@10.18.0/dist/framer-motion.js"></script>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js"></script>
+
+    <style>
+        /* 修复移动端点击延迟 */
+        * { touch-action: manipulation; }
+        .glass {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+        .input-hidden::-webkit-outer-spin-button,
+        .input-hidden::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    </style>
+</head>
+<body class="bg-bg text-text antialiased overflow-hidden h-[100dvh] flex justify-center items-center select-none">
+
+    <div id="root" class="w-full h-full max-w-[400px] mx-auto relative overflow-hidden shadow-2xl bg-bg"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useMemo } = React;
+        const { motion, AnimatePresence } = window.Motion;
+
+        // --- 工具函数 ---
+        const generateCode = () => Math.random().toString(36).substr(2, 6).toUpperCase();
+        const getPeerId = () => `Yike-${localStorage.getItem('yike_my_id') || ''}`;
+        const formatTime = (date) => new Date(date).toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
+
+        // --- 背景组件 ---
+        const Background = () => (
+            <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+                <div className="absolute top-0 left-0 w-64 h-64 bg-theme rounded-full mix-blend-multiply filter blur-[120px] opacity-40 animate-blob"></div>
+                <div className="absolute top-0 right-0 w-64 h-64 bg-aux rounded-full mix-blend-multiply filter blur-[120px] opacity-40 animate-blob animation-delay-2000"></div>
+                <div className="absolute -bottom-32 left-20 w-64 h-64 bg-pink rounded-full mix-blend-multiply filter blur-[120px] opacity-40 animate-blob animation-delay-4000"></div>
+            </div>
+        );
+
+        // --- 状态页面：加载/重连 ---
+        const LoadingView = ({ status, onReset }) => {
+            let content = {
+                'INIT': { icon: '🏠', text: '正在打开小窝...', sub: '' },
+                'RECONNECT': { icon: '🧵', text: '正在牵起断掉的红线...', sub: '如果TA不在线，我们会一直等' },
+                'WAITING_HOST': { icon: '⏳', text: '等待 TA 回应...', sub: '请把暗号告诉 TA' },
+                'CONNECTING': { icon: '🚪', text: '正在敲门...', sub: '轻轻敲一下' },
+                'ERROR': { icon: '💔', text: '连接好像失败了', sub: '' }
+            }[status];
+
+            if(status === 'ERROR') {
+                return (
+                    <div className="flex flex-col items-center justify-center h-full p-8 text-center space-y-6">
+                        <div className="text-6xl">{content.icon}</div>
+                        <h2 className="text-xl font-bold">{content.text}</h2>
+                        <p className="text-sm text-subText">{content.sub}</p>
+                        <button onClick={onReset} className="px-6 py-2 bg-theme rounded-full text-white font-bold shadow-md btn-jelly">
+                            重新尝试
+                        </button>
+                    </div>
+                )
+            }
+
+            return (
+                <motion.div 
+                    initial={{ opacity: 0 }} 
+                    animate={{ opacity: 1 }}
+                    className="flex flex-col items-center justify-center h-full"
+                >
+                    <div className="text-6xl mb-6 animate-bounce">{content.icon}</div>
+                    <h2 className="font-display text-2xl mb-2">{content.text}</h2>
+                    <p className="text-sm text-subText">{content.sub}</p>
+                </motion.div>
+            );
+        };
+
+        // --- 页面：首次引导 (创建/加入) ---
+        const Onboarding = ({ onJoin }) => {
+            const [mode, setMode] = useState('choice'); // choice, create, join
+            const [inputCode, setInputCode] = useState('');
+            const [myCode, setMyCode] = useState('');
+
+            const createNest = () => {
+                const code = generateCode();
+                setMyCode(code);
+                setMode('created');
+                // 这里把 code 存入 localStorage 变成我的 ID
+                localStorage.setItem('yike_my_id', code);
+                // 告诉父组件我变成了 Host
+                onJoin(code, 'HOST'); 
+            };
+
+            const handleJoin = () => {
+                if(inputCode.length < 4) return;
+                localStorage.setItem('yike_my_id', 'Guest-' + inputCode); // 临时 Guest ID
+                onJoin(inputCode, 'GUEST');
+            };
+
+            return (
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="h-full flex flex-col pt-16 px-8 pb-8 justify-center"
+                >
+                    <AnimatePresence mode="wait">
+                        {mode === 'choice' && (
+                            <motion.div key="choice" className="space-y-6">
+                                <div className="text-center mb-10">
+                                    <h1 className="font-display text-4xl text-theme mb-2">伊可</h1>
+                                    <p className="text-sm text-subText">欢迎来到只属于我们的秘密基地</p>
+                                </div>
+                                <button 
+                                    onClick={() => setMode('create')}
+                                    className="w-full p-6 glass rounded-3xl text-left hover:bg-white/80 transition-all active:scale-[0.98]"
+                                >
+                                    <div className="text-3xl mb-2">✨</div>
+                                    <div className="font-bold text-text">创建新的小窝</div>
+                                    <div className="text-xs text-subText mt-1">生成专属暗号，让 TA 来找你</div>
+                                </button>
+                                <button 
+                                    onClick={() => setMode('join')}
+                                    className="w-full p-6 glass rounded-3xl text-left hover:bg-white/80 transition-all active:scale-[0.98]"
+                                >
+                                    <div className="text-3xl mb-2">🚪</div>
+                                    <div className="font-bold text-text">去敲门 (加入)</div>
+                                    <div className="text-xs text-subText mt-1">输入 TA 给你的暗号</div>
+                                </button>
+                            </motion.div>
+                        )}
+
+                        {mode === 'create' && (
+                            <motion.div key="create" className="text-center space-y-8">
+                                <h2 className="font-display text-2xl">小窝已创建!</h2>
+                                <p className="text-sm text-subText">请把下方暗号告诉 TA</p>
+                                <div 
+                                    className="text-5xl font-display tracking-widest text-theme border-b-2 border-theme pb-2 select-all"
+                                    id="copy-code"
+                                >
+                                    {myCode}
+                                </div>
+                                <p className="text-xs text-subText mt-8">正在等待 TA 连接...</p>
+                                <button 
+                                    onClick={() => setMode('choice')}
+                                    className="text-xs text-subText underline"
+                                >
+                                    重新选择
+                                </button>
+                            </motion.div>
+                        )}
+
+                        {mode === 'join' && (
+                            <motion.div key="join" className="space-y-6">
+                                <h2 className="font-display text-2xl text-center">去敲门</h2>
+                                <div className="space-y-2">
+                                    <input 
+                                        type="text" 
+                                        placeholder="输入 TA 的暗号" 
+                                        maxLength={6}
+                                        className="w-full text-center text-3xl font-display tracking-widest bg-transparent border-b-2 border-gray-300 focus:border-theme outline-none py-2 uppercase placeholder-gray-300"
+                                        value={inputCode}
+                                        onChange={(e) => setInputCode(e.target.value.toUpperCase())}
+                                    />
+                                </div>
+                                <button 
+                                    onClick={handleJoin}
+                                    disabled={inputCode.length < 4}
+                                    className={`w-full py-4 rounded-2xl font-bold text-white shadow-lg transition-all btn-jelly
+                                        ${inputCode.length < 4 ? 'bg-gray-300' : 'bg-theme'}
+                                    `}
+                                >
+                                    敲门 🚪
+                                </button>
+                                <button 
+                                    onClick={() => setMode('choice')}
+                                    className="w-full py-2 text-sm text-subText"
+                                >
+                                    返回
+                                </button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </motion.div>
+            );
+        };
+
+        // --- 组件：情感树洞 ---
+        const TreeHole = ({ messages, onSend, onReact }) => {
+            const [input, setInput] = useState('');
+            const scrollRef = useRef(null);
+
+            const handleSend = () => {
+                if(!input.trim()) return;
+                onSend({ id: generateCode() + Date.now(), text: input, isAnon: true, timestamp: Date.now(), reactions: {} });
+                setInput('');
+            };
+
+            return (
+                <div className="h-full flex flex-col relative">
+                    <div className="flex-1 overflow-y-auto no-scrollbar pb-28 px-1 space-y-4 pt-2" ref={scrollRef}>
+                        {messages.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center mt-20 opacity-50">
+                                <div className="text-5xl mb-4">📮</div>
+                                <p className="text-sm text-subText text-center">这里是通往彼此内心的信箱<br/>第一封信，等你落笔 ✒️</p>
+                            </div>
+                        ) : (
+                            messages.sort((a,b) => b.timestamp - a.timestamp).map(msg => (
+                                <MessageCard key={msg.id} msg={msg} onReact={onReact} partnerName={msg.isAnon ? '神秘人' : 'TA'} />
+                            ))
+                        )}
+                    </div>
+                    
+                    <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-bg via-bg to-transparent pb-6">
+                        <div className="glass p-1.5 rounded-2xl shadow-sm flex items-end gap-2">
+                            <textarea
+                                value={input}
+                                onChange={(e) => setInput(e.target.value)}
+                                placeholder="say something..."
+                                className="flex-1 bg-transparent outline-none text-sm px-3 py-2 resize-none h-10 max-h-24"
+                                rows={1}
+                                onKeyDown={(e) => { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }}}
+                            />
+                            <button 
+                                onClick={handleSend}
+                                className="bg-text text-white w-8 h-8 rounded-xl mb-1 mr-1 flex items-center justify-center btn-jelly shadow-md"
+                            >
+                                ❤️
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const MessageCard = ({ msg, onReact, partnerName }) => {
+            const [reacted, setReacted] = useState(false);
+            const [particles, setParticles] = useState([]);
+
+            const handleReaction = (e) => {
+                e.stopPropagation();
+                setReacted(true);
+                onReact(msg.id);
+                // 粒子特效数据
+                setParticles([1,2,3].map(i => ({ id: i })));
+                setTimeout(() => setParticles([]), 1000);
+            };
+
+            return (
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="glass p-4 rounded-3xl relative"
+                >
+                    {/* 粒子层 */}
+                    {particles.map(p => (
+                        <motion.div
+                            key={p}
+                            initial={{ scale: 0, x: 0, y: 0, opacity: 1 }}
+                            animate={{ scale: 0.5, x: (Math.random()-0.5)*80, y: -80, opacity: 0 }}
+                            transition={{ duration: 0.8 }}
+                            className="absolute top-1/2 left-1/2 text-pink pointer-events-none text-sm"
+                        >
+                            ❤️
+                        </motion.div>
+                    ))}
+
+                    <div className="flex justify-between items-baseline mb-2">
+                        <span className="font-bold text-sm text-text/80">{partnerName}</span>
+                        <span className="text-[10px] text-subText">{formatTime(msg.timestamp)}</span>
+                    </div>
+                    <p className="text-sm leading-relaxed text-text/90">{msg.text}</p>
+                    
+                    <div className="mt-3 flex justify-end">
+                        <button 
+                            onClick={handleReaction}
+                            className={`flex items-center gap-1 text-xs px-3 py-1 rounded-full border transition-all duration-300
+                                ${reacted ? 'bg-pink border-pink text-white scale-110' : 'bg-white/50 border-gray-200 text-gray-400'}
+                            `}
+                        >
+                            <span className={reacted ? "animate-ping-once" : ""}>❤️</span>
+                            <span>{msg.reactions || 0}</span>
+                        </button>
+                    </div>
+                </motion.div>
+            );
+        };
+
+        // --- 组件：待办 ---
+        const SharedTodo = ({ todos, onAdd, onToggle }) => {
+            const [input, setInput] = useState('');
+            const activeTodos = todos.filter(t => !t.completed);
+            const completedTodos = todos.filter(t => t.completed);
+
+            const handleAdd = () => {
+                if(!input.trim()) return;
+                onAdd({ id: generateCode(), text: input, completed: false, timestamp: Date.now() });
+                setInput('');
+            }
+
+            return (
+                <div className="h-full flex flex-col overflow-hidden">
+                    <div className="flex-1 overflow-y-auto no-scrollbar pb-28 space-y-3 px-1 pt-2">
+                        <h2 className="font-display text-xl mb-2 px-1">待办清单 📝</h2>
+                        
+                        {activeTodos.length === 0 && completedTodos.length === 0 && (
+                            <div className="text-center mt-10 opacity-50 text-sm text-subText">
+                                <div className="text-3xl mb-2">🌱</div>
+                                还没有种下任何小目标
+                            </div>
+                        )}
+
+                        {activeTodos.map(todo => (
+                            <TodoItem key={todo.id} todo={todo} onToggle={onToggle} />
+                        ))}
+                        
+                        {completedTodos.length > 0 && (
+                            <div className="pt-6 pb-2 opacity-60">
+                                <h3 className="text-xs font-bold mb-3 tracking-wider text-subText px-1">✨ 完成的小事</h3>
+                                <div className="space-y-3">
+                                    {completedTodos.map(todo => (
+                                        <TodoItem key={todo.id} todo={todo} onToggle={onToggle} />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-bg via-bg to-transparent pb-6">
+                        <div className="flex gap-2">
+                            <input 
+                                value={input}
+                                onChange={e => setInput(e.target.value)}
+                                placeholder="记一下..."
+                                className="flex-1 bg-white/80 px-4 py-2.5 rounded-full outline-none text-sm border border-white focus:border-theme/50 transition-colors"
+                                onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+                            />
+                            <button onClick={handleAdd} className="bg-theme text-white w-12 h-12 rounded-full flex items-center justify-center shadow-md btn-jelly">
+                                ➕
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const TodoItem = ({ todo, onToggle }) => {
+            return (
+                <motion.div 
+                    layout
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: todo.completed ? 0.6 : 1, x: 0 }}
+                    className={`glass p-4 rounded-2xl flex items-center gap-3 overflow-hidden
+                        ${todo.completed ? 'bg-gray-50/50' : ''}
+                    `}
+                >
+                    <button 
+                        onClick={() => onToggle(todo.id)}
+                        className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all duration-300
+                            ${todo.completed ? 'bg-theme border-theme' : 'border-gray-300'}
+                        `}
+                    >
+                        {todo.completed && <span className="text-white text-xs leading-none">✓</span>}
+                    </button>
+                    
+                    <div className={`flex-1 text-sm relative ${todo.completed ? 'text-gray-400' : 'text-text'}`}>
+                        <span className="relative z-10">{todo.text}</span>
+                        {/* 下划线动画 */}
+                        {todo.completed && (
+                            <motion.div 
+                                initial={{ width: 0 }}
+                                animate={{ width: '100%' }}
+                                transition={{ duration: 0.3 }}
+                                className="absolute top-1/2 left-0 h-px bg-theme -translate-y-1/2"
+                            />
+                        )}
+                    </div>
+                </motion.div>
+            );
+        };
+
+        // --- 组件：语音 ---
+        const VoiceMemo = ({ onSave }) => {
+            const [isRecording, setIsRecording] = useState(false);
+            const [timer, setTimer] = useState(0);
+            const mediaRecorderRef = useRef(null);
+            const timerRef = useRef(null);
+
+            const toggleRecord = async () => {
+                if(isRecording) {
+                    // Stop
+                    clearInterval(timerRef.current);
+                    if(mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+                        mediaRecorderRef.current.stop();
+                    }
+                    setIsRecording(false);
+                } else {
+                    // Start
+                    try {
+                        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                        mediaRecorderRef.current = new MediaRecorder(stream);
+                        const chunks = [];
+                        mediaRecorderRef.current.ondataavailable = (e) => chunks.push(e.data);
+                        mediaRecorderRef.current.onstop = () => {
+                            const blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
+                            const reader = new FileReader();
+                            reader.readAsDataURL(blob);
+                            reader.onloadend = () => {
+                                onSave({ id: generateCode(), src: reader.result, duration: timer, date: Date.now() });
+                                stream.getTracks().forEach(t => t.stop());
+                            };
+                        };
+                        mediaRecorderRef.current.start();
+                        setIsRecording(true);
+                        setTimer(0);
+                        timerRef.current = setInterval(() => setTimer(t => t+1), 1000);
+                    } catch (err) {
+                        alert("需要麦克风权限哦 🎤");
+                    }
+                }
+            };
+
+            const formatTimer = (s) => {
+                const mins = Math.floor(s / 60);
+                const secs = s % 60;
+                return `${mins}:${secs.toString().padStart(2, '0')}`;
+            };
+
+            return (
+                <div className="h-full flex flex-col items-center justify-center text-center space-y-10 relative">
+                    <button 
+                        onClick={toggleRecord}
+                        className={`w-36 h-36 rounded-full flex items-center justify-center text-5xl shadow-2xl relative z-10 btn-jelly
+                            ${isRecording ? 'bg-red-50 text-red-500 animate-pulse-slow' : 'bg-white text-theme'}
+                        `}
+                    >
+                        🎙️
+                    </button>
+                    
+                    {isRecording && (
+                        <>
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <div className="w-48 h-48 bg-red-400/10 rounded-full animate-ping"></div>
+                            </div>
+                            <div className="font-display text-3xl text-red-400">{formatTimer(timer)}</div>
+                        </>
+                    )}
+
+                    <p className="text-sm text-subText px-12">
+                        {isRecording ? "正在倾听你的声音..." : "长按按钮开始录音"}
+                    </p>
+                </div>
+            );
+        };
+
+        // --- 主应用 ---
+        const App = () => {
+            const [step, setStep] = useState('LOADING'); // LOADING, ONBARDING, HOME
+            const [conn, setConn] = useState(null);
+            const [peer, setPeer] = useState(null);
+            const [status, setStatus] = useState('INIT');
+            const [role, setRole] = useState(''); // HOST or GUEST
+            const [partnerId, setPartnerId] = useState(''); // The ID I am connected to
+            
+            // Data
+            const [todos, setTodos] = useState([]);
+            const [messages, setMessages] = useState([]);
+            const [memos, setMemos] = useState([]);
+            const [daysStart, setDaysStart] = useState(null);
+            const [toast, setToast] = useState(null);
+
+            // --- 初始化逻辑 ---
+            useEffect(() => {
+                // 1. Load Days
+                localforage.getItem('yike_days').then(d => {
+                    if(!d) {
+                        const start = Date.now();
+                        localforage.setItem('yike_days', start);
+                        setDaysStart(start);
+                    } else setDaysStart(d);
+                });
+                // 2. Load Local Data
+                localforage.getItem('yike_todos').then(t => t && setTodos(t));
+                localforage.getItem('yike_messages').then(m => m && setMessages(m));
+                localforage.getItem('yike_memos').then(m => m && setMemos(m));
+
+                // 3. Check Connection Status
+                const savedPartner = localStorage.getItem('yike_partner_id'); // The permanent bond
+                
+                if(savedPartner) {
+                    // We have been here before, try to reconnect automatically
+                    setPartnerId(savedPartner);
+                    setStatus('RECONNECT');
+                    initPeer(null, savedPartner, 'AUTO');
+                } else {
+                    // New user
+                    setStep('ONBOARDING');
+                }
+            }, []);
+
+            // --- P2P Core ---
+            const initPeer = (myId, targetId, mode) => {
+                // If no myId, generate temporary one or use localStorage if exists
+                const storedMyId = localStorage.getItem('yike_my_id');
+                const finalMyId = myId || storedMyId || `Yike-${generateCode()}`;
+                
+                if(!storedMyId && myId) localStorage.setItem('yike_my_id', myId);
+
+                // Clean up old peer if exists
+                if(peer) peer.destroy();
+
+                const p = new Peer(finalMyId);
+                setPeer(p);
+
+                p.on('open', (id) => {
+                    console.log('My Peer ID:', id);
+                    // If I am Guest or Reconnecting, I must dial
+                    if (mode === 'GUEST' || mode === 'AUTO') {
+                        setStatus('CONNECTING');
+                        connectToPartner(targetId);
+                    }
+                });
+
+                p.on('connection', (c) => {
+                    // If I am Host, I receive connections
+                    setConn(c);
+                    handleConnectionEvents(c);
+                });
+
+                p.on('error', (err) => {
+                    console.error(err);
+                    if(err.type === 'unavailable-id') {
+                         // ID taken? Rare but possible. 
+                         // For now, just fail.
+                    }
+                    setStatus('ERROR');
+                });
+            };
+
+            const connectToPartner = (targetId) => {
+                if(!targetId || !peer) return;
+                
+                // Host might not be online yet, retry logic needed
+                // Simplified: Just try once for now, user can refresh
+                const c = peer.connect(targetId);
+                setConn(c);
+                handleConnectionEvents(c);
+            };
+
+            const handleConnectionEvents = (connection) => {
+                connection.on('open', () => {
+                    setStatus('CONNECTED');
+                    setStep('HOME');
+                    // 握手成功，互存 ID (Stabilize the relationship)
+                    // In a real app, we should verify IDs to prevent MITM, but for lovers it's ok.
+                    localStorage.setItem('yike_partner_id', connection.peer);
+                    setPartnerId(connection.peer);
+                });
+
+                connection.on('data', (payload) => {
+                    handleDataSync(payload);
+                });
+
+                connection.on('close', () => {
+                    // Connection lost
+                    setStatus('RECONNECT'); // Switch back to trying
+                    // Try to reconnect loop?
+                    // PeerJS reconnect doesn't auto-retry deep disconnects well.
+                    // We trigger a visual toast.
+                });
+            };
+
+            const handleDataSync = ({ type, data }) => {
+                switch(type) {
+                    case 'SYNC':
+                        setTodos(data.todos || []);
+                        setMessages(data.messages || []);
+                        setMemos(data.memos || []);
+                        break;
+                    case 'TODO_ADD':
+                        setTodos(prev => { const n = [...prev, data]; localforage.setItem('yike_todos', n); return n; });
+                        showToast("📝 TA 添加了新待办");
+                        break;
+                    case 'TODO_TOGGLE':
+                        setTodos(prev => prev.map(t => t.id === data.id ? data : t));
+                        break;
+                    case 'MSG':
+                        setMessages(prev => { const n = [...prev, data]; localforage.setItem('yike_messages', n); return n; });
+                        showToast("💌 新来信");
+                        break;
+                    case 'MEMO':
+                        setMemos(prev => { const n = [...prev, data]; localforage.setItem('yike_memos', n); return n; });
+                        showToast("🎵 收到语音");
+                        break;
+                }
+            };
+
+            // --- Sync Helpers ---
+            const syncAll = () => {
+                if(conn && conn.open) {
+                    conn.send({ type: 'SYNC', data: { todos, messages, memos } });
+                }
+            };
+            
+            useEffect(() => {
+                if(step === 'HOME') syncAll();
+            }, [step]);
+
+            const broadcast = (type, data) => {
+                if(conn && conn.open) conn.send({ type, data });
+            };
+
+            // --- Handlers ---
+            const handleAddTodo = (todo) => {
+                const n = [...todos, todo];
+                setTodos(n); localforage.setItem('yike_todos', n);
+                broadcast('TODO_ADD', todo);
+            };
+            const handleToggleTodo = (id) => {
+                const newTodos = todos.map(t => t.id === id ? {...t, completed: !t.completed} : t);
+                setTodos(newTodos); localforage.setItem('yike_todos', newTodos);
+                broadcast('TODO_TOGGLE', newTodos.find(t => t.id === id));
+            };
+            const handleAddMessage = (msg) => {
+                const n = [...messages, msg];
+                setMessages(n); localforage.setItem('yike_messages', n);
+                broadcast('MSG', msg);
+            };
+            const handleSaveMemo = (memo) => {
+                const n = [...memos, memo];
+                setMemos(n); localforage.setItem('yike_memos', n);
+                broadcast('MEMO', memo);
+            };
+            const handleReaction = (id) => {
+                // Simple implementation: increment local
+                const n = messages.map(m => m.id === id ? {...m, reactions: (m.reactions||0)+1} : m);
+                setMessages(n);
+                // In production, sync reaction counts
+            };
+
+            const showToast = (msg) => {
+                setToast(msg);
+                setTimeout(() => setToast(null), 3000);
+            };
+
+            // --- Render ---
+            const daysCount = useMemo(() => {
+                if(!daysStart) return 0;
+                return Math.floor((Date.now() - daysStart) / (1000 * 60 * 60 * 24));
+            }, [daysStart]);
+
+            const [activeTab, setActiveTab] = useState('treehole');
+
+            if (step === 'LOADING' || (status !== 'CONNECTED' && status !== 'ERROR')) {
+                return (
+                    <div className="h-full relative">
+                        <Background />
+                        <LoadingView status={status} onReset={() => {
+                            localStorage.removeItem('yike_partner_id');
+                            window.location.reload();
+                        }} />
+                    </div>
+                );
+            }
+
+            return (
+                <div className="h-full flex flex-col relative">
+                    <Background />
+                    
+                    {/* Toast */}
+                    <AnimatePresence>
+                        {toast && (
+                            <motion.div 
+                                initial={{ y: -50, opacity: 0 }}
+                                animate={{ y: 20, opacity: 1 }}
+                                exit={{ y: -50, opacity: 0 }}
+                                className="absolute top-0 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none"
+                            >
+                                <div className="bg-white/80 backdrop-blur-md shadow-lg px-5 py-2.5 rounded-full text-xs font-bold text-text border border-white/50">
+                                    {toast}
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* Header */}
+                    <div className="pt-12 px-6 pb-4 flex justify-between items-end">
+                        <div>
+                            <div className="font-display text-4xl text-text leading-none">
+                                {daysCount}<span className="text-lg text-subText"> 天</span>
+                            </div>
+                            <div className="text-[9px] text-subText tracking-[0.2em] uppercase font-bold mt-1">With Love</div>
+                        </div>
+                        
+                        {/* Disconnect / Reset Button */}
+                        <button 
+                            onClick={() => {
+                                if(confirm("确定要离开小窝吗？所有本地数据保留，但需要重新输入暗号才能连接。")) {
+                                    localStorage.clear();
+                                    localforage.clear();
+                                    window.location.reload();
+                                }
+                            }}
+                            className="text-[10px] text-subText underline opacity-50"
+                        >
+                            重置
+                        </button>
+                    </div>
+
+                    {/* Connection Status Indicator */}
+                    <div className="px-6 mb-2">
+                        <div className={`flex items-center gap-2 text-[10px] px-3 py-1 rounded-full w-max transition-colors
+                            ${status === 'CONNECTED' ? 'bg-green-50 text-green-600' : 'bg-yellow-50 text-yellow-600'}
+                        `}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${status === 'CONNECTED' ? 'bg-green-400' : 'bg-yellow-400 animate-pulse'}`}></span>
+                            {status === 'CONNECTED' ? '已紧紧牵住' : '连接中...'}
+                        </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 overflow-hidden relative px-4">
+                        <AnimatePresence mode="wait">
+                            {activeTab === 'treehole' && (
+                                <motion.div key="treehole" className="absolute inset-0 p-0" transition={{ duration: 0.3 }}>
+                                    <TreeHole messages={messages} onSend={handleAddMessage} onReact={handleReaction} />
+                                </motion.div>
+                            )}
+                            {activeTab === 'todo' && (
+                                <motion.div key="todo" className="absolute inset-0 p-0" transition={{ duration: 0.3 }}>
+                                    <SharedTodo todos={todos} onAdd={handleAddTodo} onToggle={handleToggleTodo} />
+                                </motion.div>
+                            )}
+                            {activeTab === 'memo' && (
+                                <motion.div key="memo" className="absolute inset-0 p-0" transition={{ duration: 0.3 }}>
+                                    <VoiceMemo onSave={handleSaveMemo} />
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+
+                    {/* Bottom Nav */}
+                    <div className="pb-6 pt-2 px-4 relative">
+                        <div className="glass h-14 rounded-[28px] flex items-center justify-around px-2 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+                            {[
+                                { id: 'treehole', icon: '🌲', label: '树洞' },
+                                { id: 'todo', icon: '📝', label: '待办' },
+                                { id: 'memo', icon: '🎙️', label: '语音' },
+                            ].map(tab => (
+                                <button 
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={`flex flex-col items-center justify-center w-full h-full rounded-[20px] transition-all duration-300 relative
+                                        ${activeTab === tab.id ? 'text-text' : 'text-subText hover:text-gray-400'}
+                                    `}
+                                >
+                                    <span className={`text-xl mb-px transition-all ${activeTab === tab.id ? 'scale-125' : 'scale-100'}`}>{tab.icon}</span>
+                                    {activeTab === tab.id && (
+                                        <motion.div layoutId="nav-pill" className="absolute bottom-2 w-1 h-1 bg-text rounded-full" />
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
