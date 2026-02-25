@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>伊可 Yike | 情侣小窝</title>
     
-    <!-- 字体策略：纯系统字体，0加载延迟 -->
     <style>
         @font-face {
             font-family: 'YikeFont';
@@ -19,20 +18,15 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { 
-                        sans: ['YikeFont', 'sans-serif'], 
-                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'monospace']
-                    },
+                    fontFamily: { sans: ['YikeFont', 'sans-serif'] },
                     colors: {
                         bg: '#FDFBF7',
-                        card: '#FFFFFF',
                         primary: '#D4A5A5',
                         primaryLight: '#E8CFC8',
                         secondary: '#A8B5B8',
                         secondaryLight: '#C5D6D8',
                         accent: '#B8C9BC',
                         accentLight: '#D4E4DE',
-                        yellow: '#E8DCCA',
                         yellowLight: '#F5EFE0',
                         text: '#5C5552',
                         textLight: '#9E9591',
@@ -42,7 +36,6 @@
                         homeBg: '#FDFBF7',
                         treeholeBg: '#FAF5F0',
                         todoBg: '#F5F7F5',
-                        preview: '#E0F2FE',
                     },
                     animation: {
                         'fade-in': 'fadeIn 0.5s ease-out',
@@ -75,24 +68,20 @@
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        /* 录音波形 */
         .recording-wave { animation: wave 0.8s ease-in-out infinite; }
         @keyframes wave { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(1.6); } }
         
-        /* 心跳 */
         @keyframes heartbeat { 0%, 100% { transform: scale(1); } 14% { transform: scale(1.1); } 28% { transform: scale(1); } 42% { transform: scale(1.1); } 70% { transform: scale(1); } }
         .heartbeat { animation: heartbeat 1.5s ease-in-out infinite; }
         
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .spin { animation: spin 1s linear infinite; }
-
-        .preview-badge {
-            background: linear-gradient(135deg, #60A5FA, #3B82F6);
-            animation: pulse-soft 2s ease-in-out infinite;
-        }
-
+        
         .jelly-btn { transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
         .jelly-btn:active { transform: scale(0.94); }
+        
+        .scale-in { animation: scaleIn 0.3s ease-out; }
+        @keyframes scaleIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body>
@@ -104,7 +93,7 @@
         const { useState, useEffect, useRef, useCallback, useMemo } = React;
 
         // --- 工具函数 ---
-        const generateId = () => 'yike_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+        const generateId = () => Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
         const formatTime = (ts) => {
             if (!ts) return '';
             const d = new Date(ts);
@@ -124,18 +113,10 @@
             return Math.floor((now - start) / (1000 * 60 * 60 * 24));
         };
 
-        // --- 初始示例数据 ---
-        const PREVIEW_DATA = {
-            messages: [
-                { id: 'p1', text: '欢迎来到伊可！这是预览模式 👋', ts: Date.now() - 120000, self: false },
-                { id: 'p2', text: '你可以在这里畅所欲言，说悄悄话~', ts: Date.now() - 60000, self: false },
-                { id: 'p3', text: '也可以试试语音留言功能 🎤', ts: Date.now() - 30000, self: false },
-            ],
-            todos: [
-                { id: 't1', text: '体验待办功能 ✅', done: true, ts: Date.now() - 86400000 },
-                { id: 't2', text: '给TA发一句甜甜的话 💕', done: false, ts: Date.now() - 3600000 },
-                { id: 't3', text: '设置你们的纪念日 📅', done: false, ts: Date.now() },
-            ]
+        // --- 存储工具 (只用 localStorage) ---
+        const Storage = {
+            get: (key) => JSON.parse(localStorage.getItem(key) || '[]'),
+            set: (key, val) => localStorage.setItem(key, JSON.stringify(val)),
         };
 
         // --- 图标库 ---
@@ -159,126 +140,56 @@
             Delete: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>,
             Refresh: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>,
             FileAudio: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>,
-            Eye: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>,
             Sparkle: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z"/></svg>,
         };
 
         // ================= 主应用 =================
         function App() {
-            const [view, setView] = useState('landing'); // landing -> home
+            const [view, setView] = useState('login');
             const [tab, setTab] = useState('home');
             const [showSettings, setShowSettings] = useState(false);
             const [toast, setToast] = useState(null);
             
-            // 数据状态
             const [myId, setMyId] = useState('');
             const [partnerId, setPartnerId] = useState('');
             const [anniversary, setAnniversary] = useState(null);
             const [messages, setMessages] = useState([]);
             const [todos, setTodos] = useState([]);
             
-            // 预览模式
-            const [isPreview, setIsPreview] = useState(false);
-            
-            // 连接状态
             const [connStatus, setConnStatus] = useState('disconnected');
             const [conn, setConn] = useState(null);
             const peerRef = useRef(null);
 
-            // 初始化 - 极简快速
+            // 初始化 - 立即完成
             useEffect(() => {
-                const savedMyId = localStorage.getItem('yike_myId');
+                let savedMyId = localStorage.getItem('yike_myId');
                 const savedPartner = localStorage.getItem('yike_partnerId');
                 const savedAnniversary = localStorage.getItem('yike_anniversary');
-                const isPreviewMode = localStorage.getItem('yike_preview');
 
                 if (savedAnniversary) setAnniversary(Number(savedAnniversary));
 
-                // 如果有我的ID，继续检查
-                if (savedMyId) {
-                    setMyId(savedMyId);
-                    
-                    if (isPreviewMode === 'true') {
-                        // 预览模式 - 瞬间加载
-                        setIsPreview(true);
-                        setMessages(PREVIEW_DATA.messages);
-                        setTodos(PREVIEW_DATA.todos);
-                        setView('home');
-                    } else if (savedPartner) {
-                        // 有partner，直接进入主页，数据后台加载
-                        setPartnerId(savedPartner);
-                        setView('home');
-                        // 后台异步加载数据
-                        loadDataBackground();
-                        // 尝试连接
-                        setTimeout(() => initPeer(savedMyId, savedPartner), 500);
-                    } else {
-                        // 有ID但没有partner，去登录页
-                        setView('login');
-                    }
+                if (!savedMyId) {
+                    savedMyId = generateId();
+                    localStorage.setItem('yike_myId', savedMyId);
+                }
+                setMyId(savedMyId);
+
+                // 读取本地数据
+                if (savedPartner) {
+                    setPartnerId(savedPartner);
+                    setMessages(Storage.get('yike_msgs'));
+                    setTodos(Storage.get('yike_todos'));
+                    setView('home');
+                    // 后台连接
+                    setTimeout(() => initPeer(savedMyId, savedPartner), 300);
                 } else {
-                    // 首次访问，去登录页
-                    const newId = generateId();
-                    localStorage.setItem('yike_myId', newId);
-                    setMyId(newId);
                     setView('login');
                 }
-
-                return () => {
-                    if (peerRef.current) peerRef.current.destroy();
-                };
             }, []);
 
-            // 后台加载数据（不影响UI展示）
-            const loadDataBackground = async () => {
-                try {
-                    // 优先从 localStorage 读取，忽略 IndexedDB 可能的延迟
-                    const msgs = localStorage.getItem('yike_msgs');
-                    const todos = localStorage.getItem('yike_todos');
-                    
-                    if (msgs) setMessages(JSON.parse(msgs));
-                    if (todos) setTodos(JSON.parse(todos));
-                    
-                    // 然后尝试从 IndexedDB 更新（异步）
-                    if (window.localforage) {
-                        const dbMsgs = await localforage.getItem('yike_msgs');
-                        const dbTodos = await localforage.getItem('yike_todos');
-                        if (dbMsgs) { localStorage.setItem('yike_msgs', JSON.stringify(dbMsgs)); setMessages(dbMsgs); }
-                        if (dbTodos) { localStorage.setItem('yike_todos', JSON.stringify(dbTodos)); setTodos(dbTodos); }
-                    }
-                } catch (e) {
-                    console.log('Background data load skipped');
-                }
-            };
-
-            // 进入预览模式 - 瞬间完成
-            const enterPreviewMode = () => {
-                setIsPreview(true);
-                localStorage.setItem('yike_preview', 'true');
-                localStorage.setItem('yike_myId', 'preview_user');
-                setMyId('preview_user');
-                setMessages(PREVIEW_DATA.messages);
-                setTodos(PREVIEW_DATA.todos);
-                setView('home');
-                setConnStatus('preview');
-                showToast('已进入预览模式');
-            };
-
-            const exitPreviewMode = () => {
-                if (confirm('退出预览模式将清除预览数据，确定退出吗？')) {
-                    localStorage.removeItem('yike_preview');
-                    setIsPreview(false);
-                    setConnStatus('disconnected');
-                    setMessages([]);
-                    setTodos([]);
-                    setView('login');
-                    showToast('已退出预览模式');
-                }
-            };
-
-            // PeerJS 连接
+            // PeerJS 连接 - 优化版
             const initPeer = useCallback((id, pid) => {
-                if (!pid || isPreview) return;
+                if (!pid) return;
                 
                 if (peerRef.current) {
                     try { peerRef.current.destroy(); } catch(e) {}
@@ -286,71 +197,64 @@
                 }
                 
                 setConnStatus('connecting');
-                console.log('Init Peer:', id, '->', pid);
 
                 try {
+                    // 最简配置，最快连接
                     const peer = new Peer(id, {
-                        debug: 0,
-                        config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }
+                        debug: 0
                     });
                     peerRef.current = peer;
 
-                    // 8秒超时
+                    // 10秒超时
                     const timeoutId = setTimeout(() => {
                         if (peerRef.current === peer) {
-                            peer.destroy();
+                            try { peer.destroy(); } catch(e) {}
                             peerRef.current = null;
                             setConnStatus('disconnected');
-                            if (view === 'home') showToast('连接超时');
                         }
-                    }, 8000);
+                    }, 10000);
 
                     peer.on('open', () => {
-                        if (peerRef.current === peer) clearTimeout(timeoutId);
+                        clearTimeout(timeoutId);
+                        if (!pid) {
+                            setConnStatus('waiting');
+                        }
                     });
 
                     peer.on('connection', (connection) => {
-                        if (peerRef.current === peer) {
-                            clearTimeout(timeoutId);
-                            setupConnection(connection);
-                        }
+                        clearTimeout(timeoutId);
+                        setupConnection(connection);
                     });
 
                     peer.on('error', (err) => {
                         console.error('Peer Error:', err);
                         if (peerRef.current === peer) {
                             clearTimeout(timeoutId);
-                            peer.destroy();
+                            try { peer.destroy(); } catch(e) {}
                             peerRef.current = null;
                             setConnStatus('disconnected');
-                            
-                            if (err.type === 'peer-unavailable') {
-                                showToast('暗号无效或TA已离线');
-                            } else if (err.type === 'unavailable-id') {
-                                const newId = generateId();
-                                localStorage.setItem('yike_myId', newId);
-                                showToast('暗号冲突，请重新分享');
-                                setTimeout(() => window.location.reload(), 1500);
-                            }
                         }
                     });
 
-                    // 延迟连接
+                    // 快速发起连接
                     setTimeout(() => {
                         if (peerRef.current === peer && pid) {
                             const connection = peer.connect(pid, { reliable: true, serialization: 'json' });
                             connection.on('open', () => {
-                                if (peerRef.current === peer) clearTimeout(timeoutId);
+                                clearTimeout(timeoutId);
                                 setupConnection(connection);
                             });
+                            connection.on('error', () => {
+                                // 连接错误不阻塞UI，继续等待对方
+                            });
                         }
-                    }, 1000);
+                    }, 500);
 
                 } catch (e) {
                     console.error('Peer init error:', e);
                     setConnStatus('disconnected');
                 }
-            }, [view, isPreview]);
+            }, []);
 
             const setupConnection = (c) => {
                 setConn(c);
@@ -362,7 +266,7 @@
                         const newMsg = data.payload;
                         setMessages(prev => {
                             const newMsgs = [...prev, newMsg];
-                            saveToStorage('yike_msgs', newMsgs);
+                            Storage.set('yike_msgs', newMsgs);
                             return newMsgs;
                         });
                         showToast('收到一条纸条');
@@ -370,7 +274,7 @@
                         const newTodo = data.payload;
                         setTodos(prev => {
                             const newTodos = [...prev, newTodo];
-                            saveToStorage('yike_todos', newTodos);
+                            Storage.set('yike_todos', newTodos);
                             return newTodos;
                         });
                         showToast('收到新待办');
@@ -387,20 +291,11 @@
                 });
             };
 
-            const saveToStorage = (key, data) => {
-                localStorage.setItem(key, JSON.stringify(data));
-                if (window.localforage) {
-                    localforage.setItem(key, data).catch(() => {});
-                }
-            };
-
             const handleReconnect = () => {
                 const pid = localStorage.getItem('yike_partnerId');
                 if (pid) {
                     showToast('正在重连...');
                     initPeer(myId, pid);
-                } else {
-                    showToast('请先输入暗号');
                 }
             };
 
@@ -409,14 +304,14 @@
                     const newMsg = { ...payload, self: true };
                     setMessages(prev => {
                         const newMsgs = [...prev, newMsg];
-                        saveToStorage('yike_msgs', newMsgs);
+                        Storage.set('yike_msgs', newMsgs);
                         return newMsgs;
                     });
                 } else if (type === 'todo') {
                     const newTodo = { ...payload, self: true };
                     setTodos(prev => {
                         const newTodos = [...prev, newTodo];
-                        saveToStorage('yike_todos', newTodos);
+                        Storage.set('yike_todos', newTodos);
                         return newTodos;
                     });
                 } else if (type === 'anniversary') {
@@ -424,7 +319,7 @@
                     localStorage.setItem('yike_anniversary', payload);
                 }
 
-                if (conn && conn.open && !isPreview) {
+                if (conn && conn.open) {
                     conn.send({ type, payload });
                 }
             };
@@ -450,11 +345,12 @@
                     onJoin={(pid) => {
                         localStorage.setItem('yike_partnerId', pid);
                         setPartnerId(pid);
+                        setMessages(Storage.get('yike_msgs'));
+                        setTodos(Storage.get('yike_todos'));
                         setView('home');
-                        setTimeout(() => initPeer(myId, pid), 300);
+                        initPeer(myId, pid);
                     }}
                     onRefresh={handleReconnect}
-                    onPreview={enterPreviewMode}
                 />
             );
 
@@ -469,23 +365,7 @@
             return (
                 <div className={`h-full flex flex-col ${getBgColor()} relative overflow-hidden transition-colors duration-500`}>
                     
-                    {/* 预览模式标识 */}
-                    {isPreview && (
-                        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50">
-                            <div className="preview-badge px-4 py-1.5 rounded-full text-white text-xs font-bold flex items-center gap-1.5 shadow-lg">
-                                <Icons.Eye className="w-3.5 h-3.5" />
-                                预览模式
-                                <button 
-                                    onClick={exitPreviewMode}
-                                    className="ml-1 w-4 h-4 rounded-full bg-white/30 flex items-center justify-center hover:bg-white/50 transition-colors"
-                                >
-                                    <Icons.Close className="w-2.5 h-2.5" />
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* 背景装饰 */}
+                    {/* 背景 */}
                     <div className="absolute inset-0 pointer-events-none">
                         {tab === 'home' && (
                             <>
@@ -511,31 +391,22 @@
                     <header className="relative z-10 px-6 pt-6 pb-3 flex justify-between items-center">
                         <div className="flex items-center gap-2">
                             <div className={`w-2.5 h-2.5 rounded-full transition-all duration-500 ${
-                                isPreview ? 'bg-blue-400 shadow-[0_0_8px_#60A5FA]' :
                                 connStatus === 'connected' ? 'bg-success shadow-[0_0_8px_#A8C9A8]' : 
                                 connStatus === 'connecting' || connStatus === 'waiting' ? 'bg-yellow-400 animate-pulse' : 'bg-gray-300'
                             }`}></div>
                             <span className="text-xs font-medium text-textLight">
-                                {isPreview ? '预览模式' :
-                                 connStatus === 'connected' ? 'TA 在线' : 
+                                {connStatus === 'connected' ? 'TA 在线' : 
                                  connStatus === 'connecting' ? '寻找中...' : 
                                  connStatus === 'waiting' ? '等待牵手' : '离线'}
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
-                            {!isPreview && (connStatus === 'disconnected' || connStatus === 'failed') && (
-                                <button 
-                                    onClick={handleReconnect}
-                                    className="p-1.5 rounded-full bg-white/50 text-textLighter hover:text-primary transition-colors jelly-btn"
-                                    title="重新连接"
-                                >
+                            {connStatus === 'disconnected' && (
+                                <button onClick={handleReconnect} className="p-1.5 rounded-full bg-white/50 text-textLighter hover:text-primary transition-colors jelly-btn" title="重新连接">
                                     <Icons.Refresh className="w-4 h-4" />
                                 </button>
                             )}
-                            <button 
-                                onClick={() => setShowSettings(true)} 
-                                className="p-2 rounded-full text-textLight hover:bg-white/60 transition-colors jelly-btn"
-                            >
+                            <button onClick={() => setShowSettings(true)} className="p-2 rounded-full text-textLight hover:bg-white/60 transition-colors jelly-btn">
                                 <Icons.Setting className="w-5 h-5" />
                             </button>
                         </div>
@@ -543,7 +414,7 @@
 
                     {/* 纪念日卡片 */}
                     <div className="px-6 pb-4 relative z-10">
-                        <div className="glass rounded-3xl p-5 shadow-sm flex items-center justify-between">
+                        <div className="glass rounded-3xl p-5 shadow-sm flex items-center justify-between scale-in">
                             <div>
                                 <div className="flex items-baseline gap-1">
                                     <p className="text-xs text-textLight">相爱</p>
@@ -566,9 +437,8 @@
                     <main className="flex-1 overflow-y-auto hide-scrollbar px-4 pb-28 relative z-0">
                         {tab === 'home' && (
                             <div className="space-y-3 pt-2">
-                                {/* 空状态引导 */}
-                                {timelineData.length === 0 && messages.length === 0 && todos.length === 0 ? (
-                                    <div className="flex flex-col items-center justify-center py-16">
+                                {timelineData.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center py-16 scale-in">
                                         <div className="text-6xl mb-4 animate-bounce-soft">🌱</div>
                                         <p className="text-textLight text-center mb-6">小窝还是空的，<br/>快去树洞或待办里留下点什么吧</p>
                                         <div className="flex gap-2">
@@ -589,10 +459,9 @@
                         {tab === 'msg' && (
                             <TreeHoleView 
                                 messages={messages} 
-                                onSend={(text) => sendData('msg', { id: generateId(), text: text, ts: Date.now() })} 
+                                onSend={(text) => sendData('msg', { id: generateId(), text, ts: Date.now() })} 
                                 connStatus={connStatus}
                                 toast={showToast}
-                                isPreview={isPreview}
                             />
                         )}
 
@@ -604,11 +473,10 @@
                                 onDelete={(id) => {
                                     setTodos(prev => {
                                         const filtered = prev.filter(t => t.id !== id);
-                                        saveToStorage('yike_todos', filtered);
+                                        Storage.set('yike_todos', filtered);
                                         return filtered;
                                     });
                                 }}
-                                isPreview={isPreview}
                             />
                         )}
                     </main>
@@ -616,25 +484,9 @@
                     {/* 底部导航栏 */}
                     <nav className="absolute bottom-0 left-0 right-0 z-30 px-4 pb-4 pt-2">
                         <div className="glass rounded-2xl p-2 shadow-lg border border-white/60 flex justify-around items-center">
-                            <NavBtn 
-                                icon={<Icons.List className="w-6 h-6"/>} 
-                                label="待办"
-                                active={tab === 'todo'} 
-                                onClick={() => setTab('todo')}
-                            />
-                            <NavBtn 
-                                icon={<Icons.Msg className="w-6 h-6"/>} 
-                                label="树洞"
-                                active={tab === 'msg'} 
-                                onClick={() => setTab('msg')}
-                            />
-                            <NavBtn 
-                                icon={<Icons.Home className="w-7 h-7"/>} 
-                                label="时光"
-                                active={tab === 'home'} 
-                                onClick={() => setTab('home')}
-                                isCenter={true}
-                            />
+                            <NavBtn icon={<Icons.List className="w-6 h-6"/>} label="待办" active={tab === 'todo'} onClick={() => setTab('todo')} />
+                            <NavBtn icon={<Icons.Msg className="w-6 h-6"/>} label="树洞" active={tab === 'msg'} onClick={() => setTab('msg')} />
+                            <NavBtn icon={<Icons.Home className="w-7 h-7"/>} label="时光" active={tab === 'home'} onClick={() => setTab('home')} isCenter={true} />
                         </div>
                     </nav>
 
@@ -647,7 +499,6 @@
                                 setShowSettings(false);
                             }}
                             onClose={() => setShowSettings(false)}
-                            isPreview={isPreview}
                         />
                     )}
 
@@ -662,10 +513,11 @@
         }
 
         // ================= 登录组件 =================
-        function LoginView({ myId, connStatus, onJoin, onRefresh, onPreview }) {
+        function LoginView({ myId, connStatus, onJoin, onRefresh }) {
             const [mode, setMode] = useState(null);
             const [inputCode, setInputCode] = useState('');
             const [copied, setCopied] = useState(false);
+            const [isJoining, setIsJoining] = useState(false);
 
             const handleCopy = () => {
                 navigator.clipboard.writeText(myId).then(() => {
@@ -685,23 +537,16 @@
 
             if (mode === 'create' && myId) {
                 return (
-                    <div className="h-full flex flex-col items-center justify-center bg-homeBg p-6 relative">
+                    <div className="h-full flex flex-col items-center justify-center bg-homeBg p-6 relative scale-in">
                         <h1 className="text-5xl font-extrabold text-primary mb-2" style={{fontFamily: 'YikeFont'}}>Yike</h1>
                         <p className="text-textLight mb-8 text-sm">情侣的数字秘密小窝</p>
                         
                         <div className="w-full bg-white rounded-3xl p-6 text-center shadow-sm border border-primary/10 mb-6">
                             <div className="text-xs text-textLight mb-3 uppercase tracking-wider">分享暗号给 TA</div>
-                            <div 
-                                onClick={handleCopy}
-                                className="group relative bg-yellowLight/50 p-4 rounded-xl cursor-pointer hover:bg-yellowLight transition-colors active:scale-95"
-                            >
+                            <div onClick={handleCopy} className="group relative bg-yellowLight/50 p-4 rounded-xl cursor-pointer hover:bg-yellowLight transition-colors active:scale-95">
                                 <p className="text-lg font-mono font-bold text-text break-all select-all">{myId}</p>
                                 <div className="absolute top-2 right-2 text-textLighter">
-                                    {copied ? (
-                                        <span className="text-xs text-success">已复制!</span>
-                                    ) : (
-                                        <Icons.Copy className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                    )}
+                                    {copied ? <span className="text-xs text-success">已复制!</span> : <Icons.Copy className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />}
                                 </div>
                             </div>
                             <p className="text-xs text-textLighter mt-3">点击暗号复制后发送给 TA</p>
@@ -733,7 +578,7 @@
 
             if (mode === 'join') {
                 return (
-                    <div className="h-full flex flex-col justify-center bg-treeholeBg p-6">
+                    <div className="h-full flex flex-col justify-center bg-treeholeBg p-6 scale-in">
                         <h1 className="text-3xl font-bold text-text text-center mb-8">找到彼此</h1>
                         <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
                             <div className="p-4 border-b border-gray-50">
@@ -751,20 +596,24 @@
                                     alert('请输入暗号');
                                     return;
                                 }
-                                onJoin(inputCode.trim());
+                                setIsJoining(true);
+                                setTimeout(() => {
+                                    onJoin(inputCode.trim());
+                                }, 200);
                             }} 
-                            className="mt-6 w-full py-4 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-primary/30 active:scale-95 transition-transform jelly-btn"
+                            disabled={isJoining}
+                            className="mt-6 w-full py-4 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-primary/30 active:scale-95 transition-transform jelly-btn disabled:opacity-50"
                         >
-                            牵手 TA
+                            {isJoining ? '连接中...' : '牵手 TA'}
                         </button>
                         <button onClick={() => setMode(null)} className="mt-4 text-center text-sm text-textLighter">返回</button>
                     </div>
                 );
             }
 
-            //  Landing 页
+            // Landing 页
             return (
-                <div className="h-full flex flex-col items-center justify-center bg-homeBg p-6">
+                <div className="h-full flex flex-col items-center justify-center bg-homeBg p-6 scale-in">
                     <div className="mb-2 relative">
                         <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center">
                             <Icons.Heart className="w-10 h-10 text-primary heartbeat" />
@@ -789,25 +638,12 @@
                     >
                         输入暗号牵手
                     </button>
-                    
-                    <div className="w-full mt-8 pt-6 border-t border-gray-100">
-                        <button 
-                            onClick={onPreview}
-                            className="w-full py-3 bg-blue-50 text-blue-500 rounded-xl font-medium active:scale-95 transition-transform flex items-center justify-center gap-2 jelly-btn"
-                        >
-                            <Icons.Eye className="w-5 h-5" />
-                            先逛逛（预览模式）
-                        </button>
-                        <p className="text-xs text-textLighter text-center mt-2">
-                            无需暗号，快速体验所有功能
-                        </p>
-                    </div>
                 </div>
             );
         }
 
         // ================= 树洞组件 =================
-        function TreeHoleView({ messages, onSend, connStatus, toast, isPreview }) {
+        function TreeHoleView({ messages, onSend, connStatus, toast }) {
             const [text, setText] = useState('');
             const [isRecording, setIsRecording] = useState(false);
             const [recordingTime, setRecordingTime] = useState(0);
@@ -817,7 +653,7 @@
 
             const startRecording = async () => {
                 try {
-                    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    if (!navigator.mediaDevices) {
                         toast('您的浏览器不支持录音功能');
                         return;
                     }
@@ -850,27 +686,18 @@
                     }, 1000);
                     
                 } catch (e) {
-                    console.error('录音错误:', e);
                     toast('无法访问麦克风，请检查权限');
                 }
             };
 
             const stopRecording = () => {
-                if (mediaRecorderRef.current && isRecording) {
-                    mediaRecorderRef.current.stop();
-                }
-                if (timerRef.current) {
-                    clearInterval(timerRef.current);
-                }
+                if (mediaRecorderRef.current && isRecording) mediaRecorderRef.current.stop();
+                if (timerRef.current) clearInterval(timerRef.current);
                 setIsRecording(false);
             };
 
             const playAudio = () => {
-                if (audioBlob) {
-                    const url = URL.createObjectURL(audioBlob);
-                    const audio = new Audio(url);
-                    audio.play();
-                }
+                if (audioBlob) new Audio(URL.createObjectURL(audioBlob)).play();
             };
 
             const clearAudio = () => {
@@ -882,15 +709,14 @@
                 if (audioBlob) {
                     const reader = new FileReader();
                     reader.onloadend = () => {
-                        const base64Audio = reader.result;
                         const msg = {
                             id: generateId(),
                             text: '🎤 语音消息',
-                            audio: base64Audio,
+                            audio: reader.result,
                             isAudio: true,
                             ts: Date.now()
                         };
-                        window.dispatchEvent(new CustomEvent('yike-send-msg', { detail: msg }));
+                        onSend(msg.text, msg);
                         clearAudio();
                     };
                     reader.readAsDataURL(audioBlob);
@@ -900,33 +726,12 @@
                 }
             };
 
-            useEffect(() => {
-                const handler = (e) => {
-                    setMessages(prev => [...prev, { ...e.detail, self: true }]);
-                };
-                window.addEventListener('yike-send-msg', handler);
-                return () => window.removeEventListener('yike-send-msg', handler);
-            }, []);
-
             return (
                 <div className="flex flex-col h-full pb-24">
-                    {/* 预览模式引导 */}
-                    {isPreview && messages.length > 0 && messages[0]?.id.startsWith('p') && (
-                        <div className="mb-3 bg-blue-50 rounded-xl p-3 flex items-start gap-2">
-                            <Icons.Sparkle className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                            <div className="text-xs text-blue-600">
-                                <p className="font-medium mb-1">💡 快速体验</p>
-                                <p>点击下方输入框，发送一条消息试试！</p>
-                            </div>
-                        </div>
-                    )}
-
                     <div className="flex-1 overflow-y-auto hide-scrollbar space-y-3 pt-2">
-                        {messages.map(m => (
-                            <MsgCard key={m.id} msg={m} />
-                        ))}
+                        {messages.map(m => <MsgCard key={m.id} msg={m} />)}
                         {messages.length === 0 && (
-                            <div className="flex flex-col items-center justify-center mt-20">
+                            <div className="flex flex-col items-center justify-center mt-20 scale-in">
                                 <div className="text-6xl mb-4 animate-bounce-soft">📮</div>
                                 <p className="text-textLight text-sm">树洞空空荡荡...</p>
                                 <p className="text-xs text-textLighter mt-1">成为第一个留下足迹的人吧</p>
@@ -967,9 +772,7 @@
                         <div className="glass rounded-full p-2 flex items-center shadow-md">
                             <button 
                                 onClick={isRecording ? stopRecording : startRecording}
-                                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors flex-shrink-0 jelly-btn ${
-                                    isRecording ? 'bg-danger text-white animate-pulse' : 'text-textLighter hover:bg-white'
-                                }`}
+                                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors flex-shrink-0 jelly-btn ${isRecording ? 'bg-danger text-white animate-pulse' : 'text-textLighter hover:bg-white'}`}
                             >
                                 {isRecording ? <Icons.MicOff className="w-5 h-5" /> : <Icons.Mic className="w-5 h-5" />}
                             </button>
@@ -985,9 +788,7 @@
                             
                             <button 
                                 onClick={handleSend}
-                                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all flex-shrink-0 jelly-btn ${
-                                    text.trim() || audioBlob ? 'bg-primary text-white' : 'bg-gray-100 text-gray-300'
-                                }`}
+                                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all flex-shrink-0 jelly-btn ${text.trim() || audioBlob ? 'bg-primary text-white' : 'bg-gray-100 text-gray-300'}`}
                                 disabled={!text.trim() && !audioBlob}
                             >
                                 <Icons.Send className="w-4 h-4" />
@@ -999,7 +800,7 @@
         }
 
         // ================= 待办组件 =================
-        function TodoView({ todos, onAdd, onToggle, onDelete, isPreview }) {
+        function TodoView({ todos, onAdd, onToggle, onDelete }) {
             const [text, setText] = useState('');
             const [showDeleteMode, setShowDeleteMode] = useState(false);
             
@@ -1020,17 +821,7 @@
             };
 
             return (
-                <div className="space-y-4 pb-28">
-                    {isPreview && todos.length > 0 && todos[0]?.id.startsWith('t') && (
-                        <div className="bg-blue-50 rounded-xl p-3 flex items-start gap-2">
-                            <Icons.Sparkle className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                            <div className="text-xs text-blue-600">
-                                <p className="font-medium mb-1">💡 快速体验</p>
-                                <p>添加一个待办事项，或者勾选已有的试试~</p>
-                            </div>
-                        </div>
-                    )}
-
+                <div className="space-y-4 pb-28 scale-in">
                     <div className="flex gap-2">
                         <input 
                             className="flex-1 bg-white p-3 rounded-xl outline-none text-sm shadow-sm placeholder-textLighter"
@@ -1041,9 +832,7 @@
                         />
                         <button 
                             onClick={() => setShowDeleteMode(!showDeleteMode)}
-                            className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors jelly-btn ${
-                                showDeleteMode ? 'bg-danger/20 text-danger' : 'bg-white text-textLighter'
-                            }`}
+                            className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors jelly-btn ${showDeleteMode ? 'bg-danger/20 text-danger' : 'bg-white text-textLighter'}`}
                         >
                             <Icons.Trash className="w-5 h-5" />
                         </button>
@@ -1062,9 +851,7 @@
                                 <div key={todo.id} className={`flex items-center gap-3 bg-white/80 p-3 rounded-xl border border-white/50 transition-all ${showDeleteMode ? 'pr-2' : ''}`}>
                                     <button 
                                         onClick={() => onToggle(todo)}
-                                        className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all jelly-btn ${
-                                            todo.done ? 'bg-success border-success' : 'border-textLighter/30 hover:border-primary'
-                                        }`}
+                                        className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all jelly-btn ${todo.done ? 'bg-success border-success' : 'border-textLighter/30 hover:border-primary'}`}
                                     >
                                         {todo.done && <Icons.Check className="w-3 h-3 text-white" />}
                                     </button>
@@ -1082,7 +869,7 @@
                     ))}
                     
                     {todos.length === 0 && (
-                        <div className="flex flex-col items-center justify-center mt-16">
+                        <div className="flex flex-col items-center justify-center mt-16 scale-in">
                             <div className="text-6xl mb-4 animate-bounce-soft">✨</div>
                             <p className="text-textLight text-sm">还没有待办事项</p>
                         </div>
@@ -1140,7 +927,7 @@
         }
 
         // ================= 设置组件 =================
-        function SettingsView({ anniversary, onSave, onClose, isPreview }) {
+        function SettingsView({ anniversary, onSave, onClose }) {
             const [date, setDate] = useState(anniversary ? formatDateOnly(anniversary) : '');
 
             return (
@@ -1152,13 +939,6 @@
                                 <Icons.Close className="w-4 h-4" />
                             </button>
                         </div>
-                        
-                        {isPreview && (
-                            <div className="mb-4 bg-blue-50 rounded-xl p-3 flex items-start gap-2">
-                                <Icons.Eye className="w-5 h-5 text-blue-400 flex-shrink-0" />
-                                <div className="text-xs text-blue-600">预览模式下设置不会同步到对方</div>
-                            </div>
-                        )}
                         
                         <div className="space-y-6">
                             <div className="space-y-2">
@@ -1180,16 +960,9 @@
                             </button>
                             
                             <div className="pt-4 border-t border-gray-100">
-                                {!isPreview && (
-                                    <button onClick={() => { if(confirm('确定要清空所有数据吗？')) { localStorage.clear(); window.location.reload(); } }} className="w-full py-3 text-sm text-danger hover:bg-danger/5 rounded-xl transition-colors jelly-btn">
-                                        清空所有数据
-                                    </button>
-                                )}
-                                {isPreview && (
-                                    <button onClick={() => { localStorage.removeItem('yike_preview'); window.location.reload(); }} className="w-full py-3 text-sm text-blue-500 hover:bg-blue-50 rounded-xl transition-colors jelly-btn">
-                                        退出预览模式
-                                    </button>
-                                )}
+                                <button onClick={() => { if(confirm('确定要清空所有数据吗？')) { localStorage.clear(); window.location.reload(); } }} className="w-full py-3 text-sm text-danger hover:bg-danger/5 rounded-xl transition-colors jelly-btn">
+                                    清空所有数据
+                                </button>
                             </div>
                         </div>
                     </div>
