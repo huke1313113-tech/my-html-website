@@ -2,324 +2,644 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>伊可 Yike - 情侣小窝</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>伊可 Yike | 情侣小窝</title>
     
     <!-- 字体 -->
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 
-    <!-- Tailwind (使用 CDN) -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
-            theme: { extend: { fontFamily: { sans: ['Nunito', 'sans-serif'] }, colors: { yike: { bg: '#FDFBF7', pink: '#E8CFC8', blue: '#D4E4E6', text: '#4A403A', gray: '#9CA3AF' } } } }
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Nunito', '"PingFang SC"', 'sans-serif'] },
+                    colors: {
+                        bg: '#FDFBF7',
+                        pink: '#E8CFC8',
+                        pinkDark: '#D4B5AD',
+                        blue: '#C5D6D8',
+                        yellow: '#F0E6D2',
+                        green: '#B8C9BC',
+                        text: '#5C5552',
+                        textLight: '#9E9591',
+                    }
+                }
+            }
         }
     </script>
-    <style>
-        body { background: #FDFBF7; margin: 0; overflow: hidden; font-family: 'Nunito', sans-serif; }
-        /* 动画 */
-        .anim-pop { animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes pop { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .anim-slide { animation: slideUp 0.4s ease-out; }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    </style>
+    
+    <!-- 核心依赖库 -->
+    <script src="https://cdn.staticfile.net/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdn.staticfile.net/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.staticfile.net/babel-standalone/7.23.5/babel.min.js"></script>
+    <script src="https://cdn.staticfile.net/localforage/1.10.0/localforage.min.js"></script>
+    <script src="https://cdn.staticfile.net/peerjs/1.5.2/peerjs.min.js"></script>
 
-    <!-- 依赖库 (按顺序加载) -->
-    <!-- React -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <!-- Babel -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- LocalForage -->
-    <script src="https://unpkg.com/localforage@1.10.0/dist/localforage.min.js"></script>
-    <!-- PeerJS -->
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <style>
+        body { 
+            background: #E5E7EB; 
+            display: flex; 
+            justify-content: center; 
+            margin: 0; 
+            min-height: 100vh;
+        }
+        #app { 
+            width: 100%; 
+            max-width: 420px; 
+            height: 100dvh; 
+            background: #FDFBF7; 
+            position: relative; 
+            overflow: hidden;
+            box-shadow: 0 0 60px rgba(0,0,0,0.1);
+        }
+        .glass {
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* 动画 */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .anim-fade { animation: fadeIn 0.3s ease; }
+        .anim-slide { animation: slideUp 0.4s ease; }
+        @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+        .anim-pulse { animation: pulse-soft 2s ease-in-out infinite; }
+    </style>
 </head>
 <body>
-    <!-- 根容器 -->
-    <div id="root"></div>
+    <div id="app">
+        <div id="root"></div>
+    </div>
 
-    <!-- React 逻辑 -->
+    <!-- 业务逻辑 -->
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // 简单的 ID 生成
-        const uid = () => Math.random().toString(36).substr(2, 6);
-        const time = (ts) => new Date(ts).toLocaleString('zh-CN', {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'});
+        // 工具函数
+        const uid = () => Math.random().toString(36).substr(2, 9);
+        const fmtDate = (ts) => {
+            if (!ts) return '';
+            const d = new Date(ts);
+            return `${d.getMonth()+1}/${d.getDate()} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+        };
+        
+        // 计算天数
+        const getDays = (ts) => {
+            if (!ts) return 0;
+            const start = new Date(ts);
+            const now = new Date();
+            const diff = now - start;
+            return Math.floor(diff / (1000 * 60 * 60 * 24));
+        };
 
         // 图标
         const Icon = {
-            Heart: () => <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>,
-            Send: () => <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13"/></svg>,
+            Heart: () => <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>,
             Home: () => <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>,
             Msg: () => <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
-            List: () => <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+            List: () => <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>,
+            Plus: () => <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+            Send: () => <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>,
+            Check: () => <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>,
+            Setting: () => <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
         };
 
+        // ================= 主应用 =================
         function App() {
             // 状态
-            const [page, setPage] = useState('init'); // init, login, home
-            const [tab, setTab] = useState('msg'); // msg, todo
-            const [msgs, setMsgs] = useState([]);
-            const [todos, setTodos] = useState([]);
-            const [me, setMe] = useState('');
-            const [partner, setPartner] = useState('');
-            const [conn, setConn] = useState(null);
-            const [status, setStatus] = useState('disconnected'); // connected, disconnected
+            const [view, setView] = useState('loading'); // loading, login, home
+            const [tab, setTab] = useState('msg'); // msg, todo, home
+            const [showSettings, setShowSettings] = useState(false);
+            const [toast, setToast] = useState(null);
             
-            // 登录表单
-            const [inputCode, setInputCode] = useState('');
-            const [myCode, setMyCode] = useState('');
+            // 数据
+            const [myId, setMyId] = useState('');
+            const [partnerId, setPartnerId] = useState('');
+            const [anniversary, setAnniversary] = useState(null);
+            const [messages, setMessages] = useState([]);
+            const [todos, setTodos] = useState([]);
+            
+            // 连接
+            const [connStatus, setConnStatus] = useState('disconnected');
+            const [conn, setConn] = useState(null);
+            const peerRef = useRef(null);
 
-            // 初始化
+            // 1. 初始化
             useEffect(() => {
                 const init = async () => {
-                    // 读取缓存
-                    const savedMe = localStorage.getItem('y_me');
-                    const savedPartner = localStorage.getItem('y_partner');
+                    // 读取本地存储
+                    const savedMyId = localStorage.getItem('yike_myId');
+                    const savedPartner = localStorage.getItem('yike_partnerId');
+                    const savedAnniversary = localStorage.getItem('yike_anniversary');
                     
-                    // 读取 IndexedDB 数据
-                    const m = await localforage.getItem('y_msgs') || [];
-                    const t = await localforage.getItem('y_todos') || [];
-                    setMsgs(m);
-                    setTodos(t);
+                    if (savedAnniversary) setAnniversary(Number(savedAnniversary));
 
-                    if (savedMe && savedPartner) {
-                        setMe(savedMe);
-                        setPartner(savedPartner);
-                        setPage('home');
-                        connectPeer(savedMe, savedPartner);
+                    // 读取 IndexedDB
+                    const msgs = await localforage.getItem('yike_msgs') || [];
+                    const todos = await localforage.getItem('yike_todos') || [];
+                    setMessages(msgs);
+                    setTodos(todos);
+
+                    if (savedMyId && savedPartner) {
+                        setMyId(savedMyId);
+                        setPartnerId(savedPartner);
+                        setView('home');
+                        initPeer(savedMyId, savedPartner);
                     } else {
-                        setPage('login');
+                        setView('login');
                     }
                 };
-                // 稍微延迟，确保库加载完成
+                
+                // 延迟执行，确保DOM就绪
                 setTimeout(init, 500);
             }, []);
 
-            // P2P 连接逻辑
-            const connectPeer = (myId, partnerId) => {
-                setStatus('connecting');
-                try {
-                    const peer = new Peer(myId);
-                    
-                    // 超时保护：10秒没连上就算失败
-                    const timer = setTimeout(() => {
-                        setStatus('disconnected');
-                        alert("连接超时，请检查网络或重新生成暗号");
-                    }, 10000);
+            // 2. PeerJS 连接逻辑
+            const initPeer = (id, pid, mode = 'connect') => {
+                if (peerRef.current) {
+                    peerRef.current.destroy();
+                }
+                
+                setConnStatus('connecting');
+                console.log(`Init Peer: ${id} -> ${pid}, Mode: ${mode}`);
 
-                    peer.on('open', () => {
-                        const conn = peer.connect(partnerId);
-                        conn.on('open', () => {
-                            setStatus('connected');
-                            setConn(conn);
-                            clearTimeout(timer);
-                        });
-                        conn.on('data', (data) => {
-                            if(data.t === 'msg') setMsgs(p => [...p, data.d]);
-                            if(data.t === 'todo') setTodos(p => [...p, data.d]);
-                        });
-                        setConn(conn);
-                    });
-                    
-                    peer.on('error', (err) => {
-                        console.error(err);
-                        clearTimeout(timer);
-                        setStatus('disconnected');
-                    });
+                const peer = new Peer(id);
+                peerRef.current = peer;
 
-                } catch(e) {
-                    console.error(e);
-                    setStatus('disconnected');
+                // 超时保护 (8秒)
+                const timer = setTimeout(() => {
+                    if (connStatus === 'connecting') {
+                        setConnStatus('disconnected');
+                        showToast('连接超时，请重试');
+                    }
+                }, 8000);
+
+                peer.on('open', (myId) => {
+                    console.log('Peer Open:', myId);
+                });
+
+                peer.on('connection', (c) => {
+                    // 对方连接我
+                    clearTimeout(timer);
+                    setupConnection(c);
+                });
+
+                peer.on('error', (err) => {
+                    console.error('Peer Error:', err);
+                    clearTimeout(timer);
+                    setConnStatus('disconnected');
+                    
+                    if (err.type === 'peer-unavailable') {
+                        showToast('暗号无效或对方已离线');
+                    } else if (err.type === 'unavailable-id') {
+                        showToast('暗号已被占用，请刷新重试');
+                    } else {
+                        showToast('连接错误: ' + err.type);
+                    }
+                });
+
+                // 我连接对方
+                if (mode === 'connect' && pid) {
+                    const c = peer.connect(pid);
+                    setupConnection(c);
                 }
             };
 
-            // 发送数据
-            const send = (t, d) => {
-                // 本地更新
-                if(t === 'msg') {
-                    setMsgs(p => [...p, {...d, self: true}]);
-                    localforage.setItem('y_msgs', [...msgs, {...d, self: true}]);
+            const setupConnection = (c) => {
+                c.on('open', () => {
+                    setConnStatus('connected');
+                    setConn(c);
+                    clearTimeout(8000);
+                    showToast('连接成功');
+                });
+
+                c.on('data', (data) => {
+                    console.log('Received:', data);
+                    if (data.type === 'msg') {
+                        setMessages(prev => [...prev, data.payload]);
+                    } else if (data.type === 'todo') {
+                        setTodos(prev => [...prev, data.payload]);
+                    } else if (data.type === 'anniversary') {
+                        setAnniversary(data.payload);
+                    }
+                });
+
+                c.on('close', () => {
+                    setConnStatus('disconnected');
+                    setConn(null);
+                    showToast('连接已断开');
+                });
+            };
+
+            // 3. 发送数据
+            const send = (type, payload) => {
+                // 本地乐观更新
+                if (type === 'msg') {
+                    setMessages(prev => [...prev, { ...payload, self: true }]);
+                    localforage.setItem('yike_msgs', [...messages, { ...payload, self: true }]);
+                } else if (type === 'todo') {
+                    setTodos(prev => [...prev, { ...payload, self: true }]);
+                    localforage.setItem('yike_todos', [...todos, { ...payload, self: true }]);
+                } else if (type === 'anniversary') {
+                    setAnniversary(payload);
+                    localStorage.setItem('yike_anniversary', payload);
                 }
-                if(t === 'todo') {
-                    setTodos(p => [...p, {...d, self: true}]);
-                    localforage.setItem('y_todos', [...todos, {...d, self: true}]);
-                }
-                // 发送给对方
-                if(conn && conn.open) {
-                    conn.send({t, d});
+
+                // 发送给对端
+                if (conn && conn.open) {
+                    conn.send({ type, payload });
                 }
             };
 
-            // --- 页面渲染 ---
+            const showToast = (msg) => {
+                setToast(msg);
+                setTimeout(() => setToast(null), 2500);
+            };
 
-            if (page === 'init') return <div className="h-screen flex items-center justify-center text-gray-400">加载资源中...</div>;
+            // ================= 页面渲染 =================
 
-            // 登录页
-            if (page === 'login') {
+            // 加载中
+            if (view === 'loading') {
                 return (
-                    <div className="h-screen flex flex-col items-center p-8 pt-20 bg-[#FDFBF7] relative">
-                        {/* 背景装饰 */}
-                        <div className="absolute top-[-20%] left-[-20%] w-[150%] h-[150%] bg-gradient-to-br from-[#E8CFC8] to-[#D4E4E6] rounded-full blur-[100px] opacity-30 pointer-events-none"></div>
-                        
-                        <h1 className="text-5xl font-bold text-[#4A403A] mb-2 anim-pop" style={{fontFamily: 'Nunito'}}>Yike</h1>
-                        <p className="text-gray-500 mb-12 text-sm">情侣的数字秘密小窝</p>
-
-                        {!myCode ? (
-                            <div className="w-full space-y-4 anim-slide">
-                                <button onClick={() => {
-                                    const code = 'yike_' + uid();
-                                    setMyCode(code);
-                                }} className="w-full py-4 bg-white shadow-lg rounded-2xl font-bold text-[#4A403A] active:scale-95 transition-transform">创建小窝 (生成暗号)</button>
-                                <button onClick={() => setMyCode('JOIN_MODE')} className="w-full py-4 bg-[#E8CFC8] text-white shadow-lg rounded-2xl font-bold active:scale-95 transition-transform">输入暗号来找 TA</button>
-                            </div>
-                        ) : myCode === 'JOIN_MODE' ? (
-                            <div className="w-full space-y-4 anim-slide">
-                                <input value={inputCode} onChange={e=>setInputCode(e.target.value)} placeholder="输入对方暗号" className="w-full p-4 bg-white rounded-2xl outline-none text-center font-mono text-lg" />
-                                <button onClick={() => {
-                                    if(!inputCode) return alert('请输入暗号');
-                                    localStorage.setItem('y_me', 'yike_' + uid());
-                                    localStorage.setItem('y_partner', inputCode);
-                                    window.location.reload();
-                                }} className="w-full py-4 bg-[#E8CFC8] text-white shadow-lg rounded-2xl font-bold active:scale-95">牵手</button>
-                                <button onClick={() => setMyCode('')} className="text-gray-400 text-sm mt-2">返回</button>
-                            </div>
-                        ) : (
-                            <div className="w-full text-center anim-slide">
-                                <div className="bg-white/80 p-6 rounded-2xl mb-6 shadow-sm backdrop-blur">
-                                    <p className="text-xs text-gray-400 mb-2">分享给 TA 的暗号 (点击复制)</p>
-                                    <div onClick={() => {navigator.clipboard.writeText(myCode); alert('已复制')}} className="text-xl font-mono font-bold text-[#E8CFC8] select-all cursor-pointer">{myCode}</div>
-                                </div>
-                                <p className="text-sm text-gray-500 animate-pulse">等待 TA 输入暗号连接...</p>
-                                <button onClick={() => {
-                                    localStorage.setItem('y_me', myCode);
-                                    localStorage.setItem('y_partner', '');
-                                    alert("已保存为本地记录，下次打开将直接进入。TA 连接时会自动绑定。");
-                                    setPage('home');
-                                    connectPeer(myCode, '');
-                                }} className="mt-8 text-xs text-gray-400 underline">先跳过，自己先用用</button>
-                            </div>
-                        )}
+                    <div className="h-full flex flex-col items-center justify-center bg-bg">
+                        <div className="w-12 h-12 rounded-full border-4 border-pink border-t-transparent animate-spin mb-4"></div>
+                        <p className="text-textLight">正在搭建小窝...</p>
                     </div>
                 );
             }
 
+            // 登录页
+            if (view === 'login') {
+                return (
+                    <LoginView 
+                        onCreate={(id) => {
+                            setMyId(id);
+                            setPartnerId('');
+                            localStorage.setItem('yike_myId', id);
+                            localStorage.setItem('yike_partnerId', '');
+                            setView('login');
+                            initPeer(id, null, 'create');
+                        }}
+                        onJoin={(id, pid) => {
+                            setMyId(id);
+                            setPartnerId(pid);
+                            localStorage.setItem('yike_myId', id);
+                            localStorage.setItem('yike_partnerId', pid);
+                            setView('home');
+                            initPeer(id, pid, 'join');
+                        }}
+                        myId={myId}
+                    />
+                );
+            }
+
             // 首页
-            const days = Math.floor((Date.now() - localStorage.getItem('y_start') * 1 || Date.now()) / 86400000);
+            const days = getDays(anniversary);
+            const allItems = [
+                ...messages.map(m => ({ ...m, kind: 'msg' })),
+                ...todos.map(t => ({ ...t, kind: 'todo' }))
+            ].sort((a, b) => b.ts - a.ts);
 
             return (
-                <div className="h-screen flex flex-col relative bg-[#FDFBF7]">
-                    {/* 背景 */}
-                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-[#E8CFC8] rounded-full blur-[80px] opacity-20"></div>
-                        <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#D4E4E6] rounded-full blur-[80px] opacity-20"></div>
+                <div className="h-full flex flex-col bg-bg relative overflow-hidden">
+                    {/* 背景装饰 */}
+                    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                        <div className="absolute top-[-20%] right-[-10%] w-[80%] h-[80%] rounded-full bg-pink/20 blur-[100px]"></div>
+                        <div className="absolute bottom-[-20%] left-[-10%] w-[80%] h-[80%] rounded-full bg-blue/20 blur-[100px]"></div>
                     </div>
 
-                    {/* 顶部状态栏 */}
-                    <header className="p-6 flex justify-between items-end relative z-10">
-                        <div>
-                            <div className="flex items-center gap-2 mb-1">
-                                <div className={`w-2 h-2 rounded-full ${status === 'connected' ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                                <span className="text-xs text-gray-400">{status === 'connected' ? '在线' : '等待连接'}</span>
-                            </div>
-                            <div className="text-2xl font-bold text-[#4A403A]" style={{fontFamily: 'Nunito'}}>
-                                Day <span className="text-[#E8CFC8]">{days}</span>
-                            </div>
+                    {/* 顶部栏 */}
+                    <header className="relative z-10 px-6 pt-6 flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                            <div className={`w-2.5 h-2.5 rounded-full ${connStatus === 'connected' ? 'bg-green-400' : connStatus === 'connecting' ? 'bg-yellow-400 anim-pulse' : 'bg-gray-300'}`}></div>
+                            <span className="text-xs text-textLight">{connStatus === 'connected' ? '在线' : '连接中'}</span>
                         </div>
-                        <div className="text-right">
-                            <div className="text-xs text-gray-400">在一起</div>
-                        </div>
+                        <button onClick={() => setShowSettings(true)} className="p-2 text-textLight hover:bg-white/50 rounded-full">
+                            <Icon.Setting />
+                        </button>
                     </header>
 
+                    {/* 纪念日卡片 */}
+                    <div className="px-6 pt-2 pb-4 relative z-10">
+                        <div className="glass rounded-3xl p-5 flex items-center justify-between shadow-sm">
+                            <div>
+                                <p className="text-xs text-textLight mb-1">我们相爱</p>
+                                <div className="text-4xl font-bold text-text">
+                                    {days} <span className="text-lg font-normal text-textLight">天</span>
+                                </div>
+                            </div>
+                            <div className="w-12 h-12 rounded-full bg-pink/20 flex items-center justify-center text-pink">
+                                <Icon.Heart />
+                            </div>
+                        </div>
+                    </div>
+
                     {/* 内容区 */}
-                    <main className="flex-1 overflow-y-auto p-4 space-y-4 pb-24 relative z-0">
-                        {/* 树洞 Tab */}
-                        {tab === 'msg' && (
-                            <div className="space-y-4">
-                                {msgs.map(m => (
-                                    <div key={m.id} className={`flex ${m.self ? 'justify-end' : 'justify-start'} anim-slide`}>
-                                        <div className={`max-w-[80%] p-3 rounded-2xl text-sm ${m.self ? 'bg-[#E8CFC8] text-white rounded-br-none' : 'bg-white text-gray-700 rounded-bl-none shadow-sm'}`}>
-                                            {m.text}
-                                            <div className={`text-[10px] mt-1 opacity-60 text-right`}>{time(m.ts)}</div>
-                                        </div>
+                    <main className="flex-1 overflow-y-auto hide-scrollbar px-4 pb-28 relative z-0">
+                        {/* 主页 Timeline */}
+                        {tab === 'home' && (
+                            <div className="space-y-3 pt-2">
+                                {allItems.map((item, i) => (
+                                    <div key={i} className={item.kind === 'msg' ? 'anim-slide' : 'anim-slide'}>
+                                        {item.kind === 'msg' ? (
+                                            <MsgCard msg={item} />
+                                        ) : (
+                                            <TodoCardMini todo={item} />
+                                        )}
                                     </div>
                                 ))}
+                                {allItems.length === 0 && (
+                                    <div className="text-center mt-16 text-textLight opacity-50">
+                                        <div className="text-4xl mb-2">🌱</div>
+                                        <p className="text-sm">小窝还是空的</p>
+                                    </div>
+                                )}
                             </div>
                         )}
+
+                        {/* 树洞 Tab */}
+                        {tab === 'msg' && <TreeHoleView messages={messages} onSend={(text) => {
+                            send('msg', { id: uid(), text, ts: Date.now() });
+                        }} />}
 
                         {/* 待办 Tab */}
-                        {tab === 'todo' && (
-                            <div className="space-y-3">
-                                {todos.map((t, i) => (
-                                    <div key={i} className="bg-white p-3 rounded-xl flex items-center gap-3 shadow-sm anim-slide">
-                                        <div className={`w-5 h-5 rounded-full border ${t.done ? 'bg-[#D4E4E6] border-[#D4E4E6]' : 'border-gray-300'}`}></div>
-                                        <span className={`flex-1 text-sm ${t.done ? 'line-through text-gray-400' : 'text-gray-700'}`}>{t.text}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
+                        {tab === 'todo' && <TodoView todos={todos} onAdd={(text) => {
+                            send('todo', { id: uid(), text, done: false, ts: Date.now() });
+                        }} />}
                     </main>
-
-                    {/* 输入区域 (仅树洞) */}
-                    {tab === 'msg' && (
-                        <div className="fixed bottom-24 left-4 right-4 z-20">
-                            <div className="bg-white/80 backdrop-blur p-2 rounded-full flex items-center shadow-lg">
-                                <input id="msgInput" className="flex-1 bg-transparent px-4 py-2 outline-none text-sm" placeholder="说点什么..." onKeyDown={e => {
-                                    if(e.key === 'Enter') {
-                                        const val = e.target.value;
-                                        if(!val) return;
-                                        send('msg', {id: Date.now(), text: val, ts: Date.now()});
-                                        e.target.value = '';
-                                    }
-                                }}/>
-                                <button className="w-10 h-10 rounded-full bg-[#E8CFC8] text-white flex items-center justify-center active:scale-90 transition-transform" onClick={() => {
-                                    const input = document.getElementById('msgInput');
-                                    const val = input.value;
-                                    if(!val) return;
-                                    send('msg', {id: Date.now(), text: val, ts: Date.now()});
-                                    input.value = '';
-                                }}>
-                                    <Icon.Send />
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* 待办添加区 (仅待办) */}
-                    {tab === 'todo' && (
-                        <div className="fixed bottom-24 left-4 right-4 z-20 flex gap-2">
-                             <input id="todoInput" className="flex-1 bg-white p-3 rounded-xl outline-none text-sm shadow-sm" placeholder="添加任务..." onKeyDown={e => {
-                                    if(e.key === 'Enter') {
-                                        const val = e.target.value;
-                                        if(!val) return;
-                                        send('todo', {text: val, done: false});
-                                        e.target.value = '';
-                                    }
-                                }}/>
-                             <button className="bg-[#D4E4E6] p-3 rounded-xl text-white active:scale-90" onClick={() => {
-                                 const input = document.getElementById('todoInput');
-                                 if(!input.value) return;
-                                 send('todo', {text: input.value, done: false});
-                                 input.value = '';
-                             }}>+</button>
-                        </div>
-                    )}
 
                     {/* 底部导航 */}
                     <nav className="absolute bottom-6 left-6 right-6 z-30">
-                        <div className="bg-white/60 backdrop-blur-md p-2 rounded-full flex justify-between items-center shadow-xl border border-white/50">
-                            <button onClick={() => setTab('msg')} className={`flex-1 py-3 rounded-full flex justify-center ${tab==='msg'?'bg-white shadow-sm text-[#E8CFC8]':'text-gray-400'}`}>
-                                <Icon.Msg />
+                        <div className="glass rounded-full p-2 flex justify-between items-center shadow-lg">
+                            <NavBtn icon={<Icon.List />} active={tab === 'todo'} onClick={() => setTab('todo')} />
+                            <NavBtn icon={<Icon.Msg />} active={tab === 'msg'} onClick={() => setTab('msg')} />
+                            
+                            <button onClick={() => setTab('home')} className={`w-14 h-14 -mt-4 rounded-full flex items-center justify-center shadow-md transition-all ${tab === 'home' ? 'bg-pink text-white scale-110' : 'bg-white text-pink'}`}>
+                                <Icon.Home />
                             </button>
-                            <button className="w-12 h-12 rounded-full bg-[#FDFBF7] flex items-center justify-center shadow-md -mt-2 border border-white">
-                                <div className="w-2 h-2 rounded-full bg-[#E8CFC8]"></div>
-                            </button>
-                            <button onClick={() => setTab('todo')} className={`flex-1 py-3 rounded-full flex justify-center ${tab==='todo'?'bg-white shadow-sm text-[#D4E4E6]':'text-gray-400'}`}>
-                                <Icon.List />
-                            </button>
+                            
+                            <div className="w-10"></div>
+                            <div className="w-10"></div>
                         </div>
                     </nav>
+
+                    {/* 设置弹窗 */}
+                    {showSettings && (
+                        <SettingsView 
+                            anniversary={anniversary} 
+                            onSave={(ts) => {
+                                send('anniversary', ts);
+                                setShowSettings(false);
+                            }}
+                            onClose={() => setShowSettings(false)}
+                        />
+                    )}
+
+                    {/* Toast */}
+                    {toast && (
+                        <div className="fixed top-28 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur px-5 py-2 rounded-full shadow-lg text-sm font-bold text-text z-50 anim-slide">
+                            {toast}
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // ================= 登录组件 =================
+        function LoginView({ onCreate, onJoin, myId }) {
+            const [mode, setMode] = useState(null); // null, create, join
+            const [inputCode, setInputCode] = useState('');
+
+            if (mode === 'create' && myId) {
+                return (
+                    <div className="h-full flex flex-col items-center justify-center bg-bg p-6 anim-fade">
+                        <h1 className="text-5xl font-bold text-pink mb-2" style={{fontFamily: 'Nunito'}}>Yike</h1>
+                        <p className="text-textLight mb-8 text-sm">情侣的数字秘密小窝</p>
+                        
+                        <div className="w-full bg-white rounded-2xl p-6 text-center shadow-sm">
+                            <p className="text-xs text-textLight mb-3">分享这个暗号给 TA</p>
+                            <div onClick={() => {navigator.clipboard.writeText(myId); alert('暗号已复制')}} className="text-xl font-mono font-bold text-pink break-all cursor-pointer p-3 bg-pink/10 rounded-xl mb-2">
+                                {myId}
+                            </div>
+                            <p className="text-xs text-textLight">点击暗号复制</p>
+                        </div>
+                        
+                        <div className="mt-8 flex items-center gap-2 text-sm text-textLight">
+                            <div className={`w-2 h-2 rounded-full ${myId ? 'bg-yellow-400 anim-pulse' : 'bg-gray-300'}`}></div>
+                            {myId ? '等待 TA 输入暗号...' : '生成中...'}
+                        </div>
+                        
+                        <button onClick={() => setMode(null)} className="mt-6 text-sm text-textLight underline">返回</button>
+                    </div>
+                );
+            }
+
+            if (mode === 'join') {
+                return (
+                    <div className="h-full flex flex-col justify-center bg-bg p-6 anim-slide">
+                        <h1 className="text-3xl font-bold text-text mb-8 text-center">输入暗号</h1>
+                        <div className="bg-white rounded-2xl p-4 shadow-sm mb-4">
+                            <input 
+                                className="w-full text-center text-lg font-mono outline-none" 
+                                placeholder="粘贴对方发来的暗号"
+                                value={inputCode}
+                                onChange={e => setInputCode(e.target.value)}
+                            />
+                        </div>
+                        <button onClick={() => {
+                            if (!inputCode) return alert('请输入暗号');
+                            const id = 'yike_' + uid();
+                            onJoin(id, inputCode);
+                        }} className="w-full py-4 bg-pink text-white rounded-2xl font-bold shadow-lg shadow-pink/30 active:scale-95 transition-transform">
+                            牵手 TA
+                        </button>
+                        <button onClick={() => setMode(null)} className="mt-4 text-center text-sm text-textLight">返回</button>
+                    </div>
+                );
+            }
+
+            // 初始选择页
+            return (
+                <div className="h-full flex flex-col items-center justify-center bg-bg p-6 anim-fade">
+                    <h1 className="text-5xl font-bold text-pink mb-2" style={{fontFamily: 'Nunito'}}>Yike</h1>
+                    <p className="text-textLight mb-12 text-sm">情侣的数字秘密小窝</p>
+                    
+                    <button onClick={() => {
+                        const id = 'yike_' + uid();
+                        onCreate(id);
+                    }} className="w-full py-4 bg-white text-text rounded-2xl font-bold shadow-sm mb-4 active:scale-95 transition-transform">
+                        创建小窝
+                    </button>
+                    <button onClick={() => setMode('join')} className="w-full py-4 bg-pink text-white rounded-2xl font-bold shadow-lg shadow-pink/30 active:scale-95 transition-transform">
+                        输入暗号牵手
+                    </button>
+                </div>
+            );
+        }
+
+        // ================= 树洞组件 =================
+        function TreeHoleView({ messages, onSend }) {
+            const [text, setText] = useState('');
+
+            const handleSend = () => {
+                if (!text.trim()) return;
+                onSend(text);
+                setText('');
+            };
+
+            return (
+                <div className="flex flex-col h-full pb-24">
+                    <div className="flex-1 overflow-y-auto hide-scrollbar space-y-3">
+                        {messages.map(m => (
+                            <MsgCard key={m.id} msg={m} />
+                        ))}
+                        {messages.length === 0 && (
+                            <div className="text-center mt-16 text-textLight opacity-50 text-sm">树洞空空荡荡...</div>
+                        )}
+                    </div>
+                    
+                    <div className="fixed bottom-6 left-6 right-6 z-20">
+                        <div className="glass rounded-full p-2 flex items-center shadow-md">
+                            <input 
+                                className="flex-1 bg-transparent px-4 py-2 outline-none text-sm"
+                                placeholder="说点什么..."
+                                value={text}
+                                onChange={e => setText(e.target.value)}
+                                onKeyDown={e => e.key === 'Enter' && handleSend()}
+                            />
+                            <button onClick={handleSend} className="w-10 h-10 rounded-full bg-pink text-white flex items-center justify-center active:scale-90 transition-transform">
+                                <Icon.Send />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // ================= 待办组件 =================
+        function TodoView({ todos, onAdd }) {
+            const [text, setText] = useState('');
+
+            const handleAdd = () => {
+                if (!text.trim()) return;
+                onAdd(text);
+                setText('');
+            };
+
+            const activeTodos = todos.filter(t => !t.done);
+            const doneTodos = todos.filter(t => t.done);
+
+            return (
+                <div className="space-y-4 pb-28">
+                    <div className="flex gap-2">
+                        <input 
+                            className="flex-1 bg-white p-3 rounded-xl outline-none text-sm shadow-sm"
+                            placeholder="添加小事..."
+                            value={text}
+                            onChange={e => setText(e.target.value)}
+                            onKeyDown={e => e.key === 'Enter' && handleAdd()}
+                        />
+                        <button onClick={handleAdd} className="w-12 h-12 rounded-xl bg-blue text-white flex items-center justify-center active:scale-90">
+                            <Icon.Plus />
+                        </button>
+                    </div>
+                    
+                    <div className="space-y-2">
+                        {activeTodos.map(t => (
+                            <div key={t.id} className="flex items-center gap-3 bg-white/60 p-3 rounded-xl border border-white/50">
+                                <div className="w-5 h-5 rounded-full border-2 border-textLight/30"></div>
+                                <span className="text-sm text-text">{t.text}</span>
+                            </div>
+                        ))}
+                    </div>
+                    
+                    {doneTodos.length > 0 && (
+                        <div className="pt-4">
+                            <p className="text-xs text-textLight mb-2">已完成</p>
+                            {doneTodos.map(t => (
+                                <div key={t.id} className="flex items-center gap-3 p-3 bg-white/30 rounded-xl opacity-60">
+                                    <div className="w-5 h-5 rounded-full bg-green flex items-center justify-center"><Icon.Check /></div>
+                                    <span className="text-sm line-through text-textLight">{t.text}</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // ================= 通用组件 =================
+        function NavBtn({ icon, active, onClick }) {
+            return (
+                <button onClick={onClick} className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${active ? 'bg-white shadow-sm text-pink' : 'text-textLight hover:bg-white/50'}`}>
+                    {icon}
+                </button>
+            );
+        }
+
+        function MsgCard({ msg }) {
+            return (
+                <div className={`flex ${msg.self ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[80%] p-3 rounded-2xl shadow-sm text-sm ${msg.self ? 'bg-pink text-white rounded-br-none' : 'bg-white text-text rounded-bl-none'}`}>
+                        {msg.text}
+                        <div className={`text-[10px] mt-1 ${msg.self ? 'text-white/70' : 'text-textLight/70'}`}>{fmtDate(msg.ts)}</div>
+                    </div>
+                </div>
+            );
+        }
+
+        function TodoCardMini({ todo }) {
+            return (
+                <div className={`flex items-center gap-2 p-2 rounded-lg text-xs ${todo.done ? 'bg-white/20 line-through text-textLight' : 'bg-yellow/30 text-text'}`}>
+                    <div className="w-1.5 h-1.5 rounded-full bg-current"></div>
+                    <span>{todo.text}</span>
+                </div>
+            );
+        }
+
+        function SettingsView({ anniversary, onSave, onClose }) {
+            const [date, setDate] = useState(anniversary ? new Date(anniversary).toISOString().split('T')[0] : '');
+
+            return (
+                <div className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm flex items-end sm:items-center justify-center">
+                    <div className="bg-bg w-full max-w-[420px] h-[70vh] sm:h-auto sm:rounded-t-3xl sm:rounded-b-3xl p-6 anim-slide">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-xl font-bold text-text">小窝设置</h2>
+                            <button onClick={onClose} className="w-8 h-8 rounded-full bg-white text-textLight flex items-center justify-center">✕</button>
+                        </div>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-sm font-bold text-textLight block mb-2">纪念日</label>
+                                <input 
+                                    type="date" 
+                                    className="w-full p-3 rounded-xl bg-white border border-gray-100 outline-none text-text"
+                                    value={date}
+                                    onChange={e => setDate(e.target.value)}
+                                />
+                                <p className="text-xs text-textLight mt-1">设置我们在一起的第一天</p>
+                            </div>
+                            
+                            <button 
+                                onClick={() => onSave(date ? new Date(date).getTime() : Date.now())}
+                                className="w-full py-4 bg-pink text-white rounded-2xl font-bold shadow-lg shadow-pink/30 active:scale-95 mt-4"
+                            >
+                                保存
+                            </button>
+                            
+                            <button 
+                                onClick={() => { if(confirm('清空所有数据？')) { localforage.clear().then(() => window.location.reload()); } }}
+                                className="w-full py-3 text-xs text-red-400 underline mt-4"
+                            >
+                                清空所有数据
+                            </button>
+                        </div>
+                    </div>
                 </div>
             );
         }
