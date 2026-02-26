@@ -5,20 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>伊可 Yike | 情侣小窝</title>
 
-    <!-- 关键 CSS 先加载 -->
+    <!-- 使用最稳定的 CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ['PingFang SC', 'Microsoft YaHei', 'sans-serif'] },
                     colors: {
                         bg: '#FDFBF7',
                         primary: '#E8CFC8',
-                        primaryDark: '#D4A5A5',
-                        secondary: '#D4E4E6',
                         text: '#4A403A',
-                        textLight: '#9CA3AF',
+                        gray: '#9CA3AF'
                     }
                 }
             }
@@ -26,209 +23,113 @@
     </script>
 
     <!-- 核心依赖 -->
-    <script src="https://cdn.staticfile.net/react/18.2.0/umd/react.production.min.js"></script>
-    <script src="https://cdn.staticfile.net/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-    <script src="https://cdn.staticfile.net/babel-standalone/7.23.5/babel.min.js"></script>
-    <script src="https://cdn.staticfile.net/peerjs/1.5.2/peerjs.min.js"></script>
+    <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" crossorigin="anonymous"></script>
 
     <style>
-        /* 加载动画 - 确保页面打开就有内容显示 */
-        .initial-loader {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background: #FDFBF7;
-        }
-        
-        .loader-heart {
-            width: 40px;
-            height: 40px;
-            background: #E8CFC8;
-            transform: rotate(45deg);
-            animation: heartbeat 1.2s ease-in-out infinite;
-        }
-        
-        .loader-heart::before,
-        .loader-heart::after {
-            content: '';
-            position: absolute;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #E8CFC8;
-        }
-        
-        .loader-heart::before { left: -20px; }
-        .loader-heart::after { top: -20px; }
-        
-        @keyframes heartbeat {
-            0%, 100% { transform: rotate(45deg) scale(1); }
-            50% { transform: rotate(45deg) scale(1.3); }
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html, body { height: 100%; }
         body {
             background: #E5E7EB;
             display: flex;
             justify-content: center;
+            align-items: center;
             min-height: 100vh;
-            margin: 0;
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
         }
-
-        #app-container {
+        #app {
             width: 100%;
             max-width: 420px;
-            height: 100dvh;
+            height: 100vh;
+            max-height: 850px;
             background: #FDFBF7;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 0 50px rgba(0,0,0,0.1);
+            box-shadow: 0 0 60px rgba(0,0,0,0.1);
         }
-
-        .jelly-btn { transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .jelly-btn:active { transform: scale(0.95); }
-        
-        .glass {
-            background: rgba(255,255,255,0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255,255,255,0.6);
+        @media (min-width: 421px) {
+            #app { height: 100vh; border-radius: 0; }
+        }
+        .btn { transition: transform 0.1s; }
+        .btn:active { transform: scale(0.95); }
+        .input-code { letter-spacing: 8px; font-size: 28px; font-weight: bold; font-family: monospace; }
+        .heartbeat { animation: heartbeat 1.5s ease-in-out infinite; }
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            14% { transform: scale(1.15); }
+            28% { transform: scale(1); }
+            42% { transform: scale(1.15); }
+            70% { transform: scale(1); }
         }
     </style>
 </head>
 <body>
-    <div id="app-container">
-        <!-- 初始加载动画 - 确保打开就显示 -->
-        <div id="initial-loader" class="initial-loader">
-            <div class="loader-heart"></div>
-            <p class="text-[#4A403A] mt-4 text-sm">正在加载...</p>
-        </div>
-        <div id="root" style="display: none;"></div>
-    </div>
-
-    <script>
-        // 确保所有依赖加载完成后初始化 React
-        function initApp() {
-            document.getElementById('initial-loader').style.display = 'none';
-            document.getElementById('root').style.display = 'block';
-        }
-
-        // 检查依赖是否加载成功
-        function checkDependencies() {
-            const deps = ['React', 'ReactDOM', 'babel', 'PeerJS'];
-            for (const dep of deps) {
-                if (typeof window[dep] === 'undefined') {
-                    console.error(dep + ' not loaded');
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        // 等待所有脚本加载完成后初始化
-        window.addEventListener('load', function() {
-            setTimeout(function() {
-                if (checkDependencies()) {
-                    initApp();
-                } else {
-                    // 依赖加载失败，尝试备用 CDN
-                    console.log('Trying fallback CDNs...');
-                    loadFallbackCDNs();
-                }
-            }, 500);
-        });
-
-        // 备用 CDN 加载
-        function loadFallbackCDNs() {
-            const fallbackScripts = [
-                'https://unpkg.com/react@18.2.0/umd/react.production.min.js',
-                'https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js',
-                'https://unpkg.com/@babel/standalone/babel.min.js',
-                'https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js'
-            ];
-            
-            let loaded = 0;
-            fallbackScripts.forEach(src => {
-                const script = document.createElement('script');
-                script.src = src;
-                script.onload = () => {
-                    loaded++;
-                    if (loaded === fallbackScripts.length) {
-                        setTimeout(initApp, 300);
-                    }
-                };
-                script.onerror = () => {
-                    console.error('Failed to load:', src);
-                };
-                document.body.appendChild(script);
-            });
-        }
-    </script>
+    <div id="app"></div>
 
     <script type="text/babel">
         const { useState, useEffect, useRef, useCallback } = React;
 
-        // 工具函数
-        const generateId = () => Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
-        
-        const generateCode = () => Math.floor(100000 + Math.random() * 900000).toString();
-        
-        const formatTime = (ts) => {
+        // 生成6位数字暗号
+        function generateCode() {
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
+        // 格式化时间
+        function formatTime(ts) {
             if (!ts) return '';
             const d = new Date(ts);
             return `${d.getMonth()+1}/${d.getDate()} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
-        };
-        
-        const getDays = (ts) => {
+        }
+
+        // 计算相爱天数
+        function getDays(ts) {
             if (!ts) return 0;
             const start = new Date(ts);
             const now = new Date();
             start.setHours(0,0,0,0);
             now.setHours(0,0,0,0);
             return Math.floor((now - start) / (1000 * 60 * 60 * 24));
-        };
+        }
 
-        // 本地存储
+        // 存储操作
         const Storage = {
             get: (key, def = []) => {
                 try {
-                    return JSON.parse(localStorage.getItem(key) || JSON.stringify(def));
+                    const v = localStorage.getItem(key);
+                    return v ? JSON.parse(v) : def;
                 } catch { return def; }
             },
             set: (key, val) => {
                 try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
-            },
-            clearAll: () => {
-                try {
-                    Object.keys(localStorage).filter(k => k.startsWith('yike_'))
-                        .forEach(k => localStorage.removeItem(k));
-                } catch {}
             }
         };
 
-        // 图标组件
-        const Icons = {
-            Heart: () => <svg className="w-6 h-6" viewBox="0 0 24 24" fill="#E8CFC8"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>,
-            Home: ({active}) => <svg className={`w-6 h-6 ${active ? 'text-[#E8CFC8]' : 'text-gray-400'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
-            Msg: ({active}) => <svg className={`w-6 h-6 ${active ? 'text-[#E8CFC8]' : 'text-gray-400'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
-            List: ({active}) => <svg className={`w-6 h-6 ${active ? 'text-[#E8CFC8]' : 'text-gray-400'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>,
-            Plus: () => <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
-            Send: () => <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>,
-            Check: () => <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>,
-            Setting: () => <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
-            Trash: () => <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>,
-            Refresh: () => <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>,
-            Close: () => <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
-            Calendar: () => <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
-            Copy: () => <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>,
+        // 图标
+        const Icon = ({ type }) => {
+            const icons = {
+                heart: <svg className="w-6 h-6" viewBox="0 0 24 24" fill="#E8CFC8"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>,
+                home: <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+                msg: <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
+                list: <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>,
+                plus: <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+                send: <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>,
+                check: <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>,
+                trash: <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>,
+                refresh: <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>,
+                setting: <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+                calendar: <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+                close: <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+            };
+            return icons[type] || null;
         };
 
-        // ============ 主应用 ============
+        // 主应用
         function App() {
             const [view, setView] = useState('loading');
             const [tab, setTab] = useState('home');
             const [showSettings, setShowSettings] = useState(false);
-            const [toast, setToast] = useState(null);
             
             const [myId, setMyId] = useState('');
             const [myCode, setMyCode] = useState('');
@@ -241,17 +142,16 @@
             const peerRef = useRef(null);
             const connRef = useRef(null);
             const isMounted = useRef(true);
+            const [toast, setToast] = useState('');
 
             // 初始化
             useEffect(() => {
                 isMounted.current = true;
                 
-                // 读取数据
                 const savedMyId = localStorage.getItem('yike_myId');
                 const savedPartnerId = localStorage.getItem('yike_partnerId');
                 const savedMyCode = localStorage.getItem('yike_myCode');
                 const savedAnniversary = localStorage.getItem('yike_anniversary');
-                
                 const msgs = Storage.get('yike_msgs', []);
                 const tds = Storage.get('yike_todos', []);
                 
@@ -259,12 +159,11 @@
                 if (msgs.length) setMessages(msgs);
                 if (tds.length) setTodos(tds);
 
-                // 生成或使用已有 ID
                 let finalMyId = savedMyId;
                 let finalMyCode = savedMyCode;
                 
                 if (!finalMyId) {
-                    finalMyId = 'yike_' + generateId();
+                    finalMyId = 'yike_' + Date.now();
                     finalMyCode = generateCode();
                     localStorage.setItem('yike_myId', finalMyId);
                     localStorage.setItem('yike_myCode', finalMyCode);
@@ -277,23 +176,22 @@
                 setMyId(finalMyId);
                 setMyCode(finalMyCode);
 
-                // 决定视图
                 if (savedPartnerId) {
                     setPartnerId(savedPartnerId);
                     setView('home');
-                    // 后台连接
-                    setTimeout(() => initPeer(finalMyId, savedPartnerId), 500);
+                    setTimeout(() => initPeer(finalMyId, savedPartnerId), 800);
                 } else {
                     setView('login');
                 }
 
-                return () => {
-                    isMounted.current = false;
-                    cleanup();
-                };
+                return () => { isMounted.current = false; cleanup(); };
             }, []);
 
-            // 清理连接
+            const showToast = (msg) => {
+                setToast(msg);
+                setTimeout(() => setToast(''), 2500);
+            };
+
             const cleanup = useCallback(() => {
                 if (peerRef.current) {
                     try { peerRef.current.destroy(); } catch {}
@@ -305,21 +203,19 @@
                 }
             }, []);
 
-            // 初始化 PeerJS - 简化版
             const initPeer = useCallback((id, pid) => {
                 if (!pid || !isMounted.current) return;
                 
                 cleanup();
                 setConnStatus('connecting');
-                console.log('Connecting:', id, '->', pid);
+                console.log('Connecting:', id, pid);
 
-                // 6秒超时
                 const timeout = setTimeout(() => {
                     if (!isMounted.current) return;
                     cleanup();
                     setConnStatus('disconnected');
-                    setToast('连接超时，请重试');
-                }, 6000);
+                    showToast('连接超时，请重试');
+                }, 8000);
 
                 try {
                     const peer = new Peer(id, {
@@ -329,20 +225,19 @@
                     peerRef.current = peer;
 
                     peer.on('open', () => {
-                        if (!isMounted.current) { clearTimeout(timeout); return; }
+                        if (!isMounted.current) return;
                         setConnStatus('waiting');
                         
-                        // 发起连接
                         setTimeout(() => {
                             if (!isMounted.current || !peerRef.current) return;
                             const conn = peer.connect(pid, { reliable: true });
                             connRef.current = conn;
                             setupConnection(conn, timeout);
-                        }, 800);
+                        }, 1000);
                     });
 
                     peer.on('connection', (conn) => {
-                        if (!isMounted.current) { clearTimeout(timeout); return; }
+                        if (!isMounted.current) return;
                         clearTimeout(timeout);
                         connRef.current = conn;
                         setupConnection(conn);
@@ -353,69 +248,56 @@
                         clearTimeout(timeout);
                         cleanup();
                         setConnStatus('disconnected');
-                        setToast('连接失败: ' + (err.type === 'peer-unavailable' ? '对方离线' : '请重试'));
+                        showToast('连接失败，请重试');
                     });
 
                 } catch (e) {
                     if (!isMounted.current) return;
                     clearTimeout(timeout);
                     setConnStatus('disconnected');
-                    setToast('初始化失败');
+                    showToast('初始化失败');
                 }
             }, [cleanup]);
 
-            // 设置连接
-            const setupConnection = useCallback((conn, timeout = null) => {
+            const setupConnection = useCallback((conn, timeout) => {
                 conn.on('open', () => {
                     if (!isMounted.current) return;
                     if (timeout) clearTimeout(timeout);
                     setConnStatus('connected');
-                    setToast('❤️ 已连接');
-                    // 发送握手
-                    conn.send({ type: 'hi', from: myId });
+                    showToast('已连接');
                 });
 
                 conn.on('data', (data) => {
                     if (!isMounted.current) return;
-                    if (data.type === 'hi') {
-                        setToast('❤️ 已连接');
-                    } else if (data.type === 'msg') {
+                    if (data.type === 'msg') {
                         setMessages(prev => {
                             const n = [...prev, data.msg];
                             Storage.set('yike_msgs', n);
                             return n;
                         });
-                        setToast('收到新消息');
+                        showToast('收到新消息');
                     } else if (data.type === 'todo') {
                         setTodos(prev => {
                             const n = [...prev, data.todo];
                             Storage.set('yike_todos', n);
                             return n;
                         });
-                        setToast('收到新待办');
+                        showToast('收到新待办');
                     }
                 });
 
                 conn.on('close', () => {
                     if (!isMounted.current) return;
                     setConnStatus('disconnected');
-                    setToast('连接断开');
-                    // 3秒后重连
                     setTimeout(() => {
                         if (partnerId && isMounted.current) {
                             initPeer(myId, partnerId);
                         }
                     }, 3000);
                 });
-
-                conn.on('error', () => {
-                    if (!isMounted.current) return;
-                    setConnStatus('disconnected');
-                });
             }, [myId, partnerId, initPeer]);
 
-            // 发送数据
-            const sendData = useCallback((type, data) => {
+            const sendData = (type, data) => {
                 if (type === 'msg') {
                     const msg = { ...data, self: true };
                     setMessages(prev => {
@@ -434,12 +316,11 @@
                 if (connRef.current && connRef.current.open) {
                     connRef.current.send(type === 'msg' ? { type: 'msg', msg: data } : { type: 'todo', todo: data });
                 }
-            }, []);
+            };
 
-            // 配对
-            const handlePair = useCallback((code) => {
+            const handlePair = (code) => {
                 if (code.length !== 6) {
-                    setToast('请输入6位数字');
+                    showToast('请输入6位数字');
                     return;
                 }
                 cleanup();
@@ -447,11 +328,10 @@
                 localStorage.setItem('yike_partnerId', pid);
                 setPartnerId(pid);
                 setView('home');
-                setTimeout(() => initPeer(myId, pid), 300);
-            }, [myId, cleanup, initPeer]);
+                setTimeout(() => initPeer(myId, pid), 500);
+            };
 
-            // 创建新小窝
-            const handleCreate = useCallback(() => {
+            const handleCreate = () => {
                 cleanup();
                 const newCode = generateCode();
                 const newId = 'yike_' + newCode;
@@ -460,13 +340,12 @@
                 setMyId(newId);
                 setMyCode(newCode);
                 setView('create');
-                setTimeout(() => initPeer(newId, null), 300);
-            }, [cleanup, initPeer]);
+                setTimeout(() => initPeer(newId, null), 500);
+            };
 
-            // 复制暗号
             const copyCode = (code) => {
                 navigator.clipboard.writeText(code).then(() => {
-                    setToast('已复制');
+                    showToast('已复制');
                 }).catch(() => {
                     const ta = document.createElement('textarea');
                     ta.value = code;
@@ -474,300 +353,310 @@
                     ta.select();
                     document.execCommand('copy');
                     document.body.removeChild(ta);
-                    setToast('已复制');
+                    showToast('已复制');
                 });
             };
 
-            // Toast 自动消失
-            useEffect(() => {
-                if (toast) {
-                    const t = setTimeout(() => setToast(null), 2500);
-                    return () => clearTimeout(t);
-                }
-            }, [toast]);
-
-            // 主页
-            if (view === 'home') {
-                const days = getDays(anniversary);
-                const timeline = [...messages.map(m => ({...m, type: 'msg'})), ...todos.map(t => ({...t, type: 'todo'}))]
-                    .sort((a, b) => b.ts - a.ts);
-
+            // 加载页面
+            if (view === 'loading') {
                 return (
-                    <div className="h-full flex flex-col bg-[#FDFBF7]">
-                        {/* 背景 */}
-                        <div className="fixed inset-0 pointer-events-none overflow-hidden">
-                            <div className="absolute top-[-30%] right-[-20%] w-[100%] h-[100%] rounded-full bg-[#E8CFC8]/10 blur-[80px]"></div>
-                            <div className="absolute bottom-[-30%] left-[-20%] w-[100%] h-[100%] rounded-full bg-[#D4E4E6]/20 blur-[80px]"></div>
-                        </div>
-
-                        {/* 顶部 */}
-                        <header className="relative z-10 px-5 pt-12 pb-3 flex justify-between items-center">
-                            <div className="flex items-center gap-2">
-                                <div className={`w-2.5 h-2.5 rounded-full transition-all ${
-                                    connStatus === 'connected' ? 'bg-green-400 animate-pulse' : 
-                                    connStatus === 'connecting' ? 'bg-yellow-400 animate-pulse' : 
-                                    connStatus === 'waiting' ? 'bg-yellow-400 animate-pulse' : 'bg-gray-300'
-                                }`}></div>
-                                <span className="text-xs text-gray-500">
-                                    {connStatus === 'connected' ? 'TA 在线' : 
-                                     connStatus === 'connecting' ? '连接中...' : 
-                                     connStatus === 'waiting' ? '等待对方...' : '离线'}
-                                </span>
-                            </div>
-                            <div className="flex gap-2">
-                                {connStatus !== 'connected' && (
-                                    <button onClick={() => partnerId && initPeer(myId, partnerId)} className="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center jelly-btn">
-                                        <Icons.Refresh />
-                                    </button>
-                                )}
-                                <button onClick={() => setShowSettings(true)} className="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center jelly-btn">
-                                    <Icons.Setting />
-                                </button>
-                            </div>
-                        </header>
-
-                        {/* 纪念日 */}
-                        <div className="relative z-10 px-5 pb-4">
-                            <div className="glass rounded-3xl p-5 shadow-sm flex items-center justify-between">
-                                <div>
-                                    <div className="flex items-baseline gap-1">
-                                        <span className="text-xs text-gray-500">相爱</span>
-                                        <span className="text-4xl font-bold text-[#4A403A]">{days}</span>
-                                        <span className="text-lg text-gray-500">天</span>
-                                    </div>
-                                    <p className="text-xs text-gray-400 mt-1">
-                                        {anniversary ? '始于 ' + new Date(anniversary).toLocaleDateString('zh-CN') : '设置纪念日开始计时'}
-                                    </p>
-                                </div>
-                                <div className="w-14 h-14 rounded-full bg-[#E8CFC8]/20 flex items-center justify-center">
-                                    <Icons.Heart />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* 内容 */}
-                        <main className="flex-1 overflow-y-auto px-4 pb-28 hide-scrollbar">
-                            {tab === 'home' && (
-                                <div className="space-y-3">
-                                    {timeline.length === 0 ? (
-                                        <div className="flex flex-col items-center justify-center py-20">
-                                            <div className="text-6xl mb-4">🌱</div>
-                                            <p className="text-gray-400 text-center text-sm">小窝还是空的，<br/>快去树洞或待办里留下点什么吧</p>
-                                            <div className="flex gap-2 mt-4">
-                                                <button onClick={() => setTab('msg')} className="px-4 py-2 bg-[#E8CFC8]/20 text-[#D4A5A5] rounded-full text-sm jelly-btn">去树洞</button>
-                                                <button onClick={() => setTab('todo')} className="px-4 py-2 bg-[#D4E4E6]/20 text-[#9CA3AF] rounded-full text-sm jelly-btn">去待办</button>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        timeline.map((item, i) => (
-                                            <div key={i} className="animate-fade-in" style={{animationDelay: `${Math.min(i * 0.05, 0.3)}s`}}>
-                                                {item.type === 'msg' ? (
-                                                    <div className={`flex ${item.self ? 'justify-end' : 'justify-start'}`}>
-                                                        <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm ${item.self ? 'bg-[#E8CFC8] text-white rounded-br-sm' : 'bg-white text-[#4A403A] rounded-bl-sm'}`}>
-                                                            {item.text}
-                                                            <div className={`text-[10px] mt-1 ${item.self ? 'text-white/70' : 'text-gray-400'}`}>{formatTime(item.ts)}</div>
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <div className={`flex items-center gap-2 p-2.5 rounded-lg text-xs ${item.done ? 'bg-white/30 line-through text-gray-400' : 'bg-[#E8CFC8]/20 text-[#4A403A]'}`}>
-                                                        <div className={`w-1.5 h-1.5 rounded-full ${item.done ? 'bg-gray-300' : 'bg-[#E8CFC8]'}`}></div>
-                                                        <span className="flex-1 truncate">{item.text}</span>
-                                                        <span className="opacity-60">{new Date(item.ts).toLocaleTimeString('zh-CN', {hour:'2-digit', minute:'2-digit'})}</span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ))
-                                    )}
-                                </div>
-                            )}
-
-                            {tab === 'msg' && (
-                                <TreeHole messages={messages} onSend={(text) => sendData('msg', { id: generateId(), text, ts: Date.now() })} />
-                            )}
-
-                            {tab === 'todo' && (
-                                <TodoList todos={todos} onAdd={(text) => sendData('todo', { id: generateId(), text, done: false, ts: Date.now() })} />
-                            )}
-                        </main>
-
-                        {/* 底部导航 */}
-                        <nav className="fixed bottom-0 left-0 right-0 z-30 px-4 pb-6 pt-2">
-                            <div className="glass rounded-2xl p-2 shadow-md border border-white/50 flex justify-around">
-                                <button onClick={() => setTab('todo')} className="flex flex-col items-center py-2 px-4 rounded-xl jelly-btn">
-                                    <Icons.List active={tab === 'todo'} />
-                                    <span className={`text-[10px] mt-1 ${tab === 'todo' ? 'text-[#E8CFC8]' : 'text-gray-400'}`}>待办</span>
-                                </button>
-                                <button onClick={() => setTab('msg')} className="flex flex-col items-center py-2 px-4 rounded-xl jelly-btn">
-                                    <Icons.Msg active={tab === 'msg'} />
-                                    <span className={`text-[10px] mt-1 ${tab === 'msg' ? 'text-[#E8CFC8]' : 'text-gray-400'}`}>树洞</span>
-                                </button>
-                                <button onClick={() => setTab('home')} className="flex flex-col items-center py-2 px-4 rounded-xl -mt-6 jelly-btn">
-                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${tab === 'home' ? 'bg-[#E8CFC8] text-white' : 'bg-white text-gray-300 shadow-lg'}`}>
-                                        <Icons.Heart />
-                                    </div>
-                                    <span className={`text-[10px] mt-1 ${tab === 'home' ? 'text-[#E8CFC8]' : 'text-gray-400'}`}>时光</span>
-                                </button>
-                            </div>
-                        </nav>
-
-                        {/* 设置弹窗 */}
-                        {showSettings && (
-                            <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-end justify-center">
-                                <div className="bg-[#FDFBF7] w-full max-w-[420px] rounded-t-3xl p-6 animate-slide-up">
-                                    <div className="flex justify-between items-center mb-6">
-                                        <h2 className="text-xl font-bold text-[#4A403A]">小窝设置</h2>
-                                        <button onClick={() => setShowSettings(false)} className="w-8 h-8 rounded-full bg-white flex items-center justify-center jelly-btn">
-                                            <Icons.Close />
-                                        </button>
-                                    </div>
-                                    <div className="space-y-4">
-                                        <div>
-                                            <label className="flex items-center gap-2 text-sm font-bold text-[#4A403A] mb-2">
-                                                <Icons.Calendar /> 纪念日
-                                            </label>
-                                            <input type="date" id="anniversary-input" className="w-full p-3 rounded-xl bg-white border border-gray-100" />
-                                        </div>
-                                        <button onClick={() => {
-                                            const d = document.getElementById('anniversary-input').value;
-                                            if (d) {
-                                                const ts = new Date(d).getTime();
-                                                localStorage.setItem('yike_anniversary', ts);
-                                                setAnniversary(ts);
-                                            }
-                                            setShowSettings(false);
-                                        }} className="w-full py-4 bg-[#E8CFC8] text-white rounded-2xl font-bold shadow-lg jelly-btn">
-                                            保存设置
-                                        </button>
-                                        <button onClick={() => {
-                                            if (confirm('确定清空所有数据吗？')) {
-                                                Storage.clearAll();
-                                                window.location.reload();
-                                            }
-                                        }} className="w-full py-3 text-sm text-red-400 hover:bg-red-50 rounded-xl jelly-btn">
-                                            清空所有数据
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Toast */}
-                        {toast && (
-                            <div className="fixed top-24 left-1/2 -translate-x-1/2 bg-gray-800/90 text-white px-5 py-2.5 rounded-full text-sm z-50 animate-fade-in">
-                                {toast}
-                            </div>
-                        )}
+                    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#FDFBF7' }}>
+                        <div style={{ width: 50, height: 50, borderRadius: '50%', background: '#E8CFC8', animation: 'heartbeat 1.5s ease-in-out infinite' }}></div>
+                        <p style={{ color: '#9CA3AF', marginTop: 20, fontSize: 14 }}>加载中...</p>
                     </div>
                 );
             }
 
-            // 登录页
+            // 登录页面
             if (view === 'login') {
                 const [inputCode, setInputCode] = useState('');
                 
                 return (
-                    <div className="h-full flex flex-col items-center justify-center bg-[#FDFBF7] p-6">
-                        <div className="w-24 h-24 rounded-full bg-[#E8CFC8]/20 flex items-center justify-center mb-6">
-                            <div className="w-12 h-12 bg-[#E8CFC8] rounded-full animate-pulse"></div>
+                    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 30, background: '#FDFBF7' }}>
+                        <div style={{ width: 80, height: 80, borderRadius: '50%', background: '#E8CFC8', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 30 }}>
+                            <div style={{ width: 30, height: 30, background: '#fff', borderRadius: '50%' }}></div>
                         </div>
-                        <h1 className="text-5xl font-bold text-[#D4A5A5] mb-2">伊可</h1>
-                        <p className="text-gray-400 mb-8 text-sm">情侣的数字秘密小窝</p>
+                        <h1 style={{ fontSize: 40, fontWeight: 'bold', color: '#D4A5A5', marginBottom: 10 }}>伊可</h1>
+                        <p style={{ color: '#9CA3AF', marginBottom: 40, fontSize: 14 }}>情侣的数字秘密小窝</p>
                         
-                        <div className="w-full bg-white rounded-2xl p-6 text-center shadow-sm border border-gray-100 mb-6">
-                            <p className="text-xs text-gray-400 mb-4">你的专属暗号</p>
-                            <div onClick={() => copyCode(myCode)} className="bg-[#FDFBF7] p-4 rounded-xl cursor-pointer border-2 border-dashed border-gray-200 jelly-btn">
-                                <p className="text-3xl font-mono font-bold text-[#4A403A]" style={{letterSpacing: '8px'}}>{myCode}</p>
-                                <p className="text-xs text-gray-400 mt-2">点击复制</p>
+                        <div style={{ width: '100%', background: 'white', borderRadius: 20, padding: 25, marginBottom: 20, textAlign: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
+                            <p style={{ color: '#9CA3AF', fontSize: 12, marginBottom: 15 }}>你的专属暗号</p>
+                            <div onClick={() => copyCode(myCode)} style={{ background: '#FDFBF7', padding: 20, borderRadius: 12, border: '2px dashed #ddd', cursor: 'pointer' }}>
+                                <p className="input-code" style={{ color: '#4A403A' }}>{myCode}</p>
+                                <p style={{ color: '#9CA3AF', fontSize: 12, marginTop: 10 }}>点击复制</p>
                             </div>
                         </div>
                         
-                        <div className="w-full space-y-3">
-                            <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-                                <p className="text-xs text-gray-400 mb-2">输入TA的暗号</p>
-                                <input 
-                                    className="w-full text-center text-2xl font-mono bg-transparent outline-none text-[#4A403A]"
-                                    placeholder="123456"
-                                    value={inputCode}
-                                    maxLength={6}
-                                    onChange={e => setInputCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                                />
-                            </div>
-                            <button 
-                                onClick={() => handlePair(inputCode)}
-                                disabled={inputCode.length !== 6}
-                                className="w-full py-4 bg-[#E8CFC8] text-white rounded-2xl font-bold shadow-lg disabled:opacity-50 jelly-btn"
-                            >
-                                牵手进入小窝
-                            </button>
-                            <div className="flex items-center gap-4 py-2">
-                                <div className="flex-1 h-px bg-gray-200"></div>
-                                <span className="text-xs text-gray-400">或</span>
-                                <div className="flex-1 h-px bg-gray-200"></div>
-                            </div>
-                            <button onClick={handleCreate} className="w-full py-4 bg-white text-[#4A403A] rounded-2xl font-bold shadow-sm border border-gray-100 jelly-btn">
-                                创建新小窝
-                            </button>
+                        <div style={{ width: '100%', background: 'white', borderRadius: 16, padding: 20, marginBottom: 15, boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
+                            <p style={{ color: '#9CA3AF', fontSize: 12, marginBottom: 10 }}>输入TA的暗号</p>
+                            <input 
+                                className="input-code"
+                                style={{ width: '100%', textAlign: 'center', background: 'transparent', outline: 'none', color: '#4A403A' }}
+                                placeholder="000000"
+                                value={inputCode}
+                                maxLength={6}
+                                onChange={e => setInputCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                            />
                         </div>
+                        
+                        <button 
+                            onClick={() => handlePair(inputCode)}
+                            disabled={inputCode.length !== 6}
+                            style={{ width: '100%', padding: '16px', background: inputCode.length === 6 ? '#E8CFC8' : '#ccc', color: 'white', border: 'none', borderRadius: 16, fontSize: 16, fontWeight: 'bold', cursor: inputCode.length === 6 ? 'pointer' : 'not-allowed', marginBottom: 20 }}
+                            className="btn"
+                        >
+                            牵手进入小窝
+                        </button>
+                        
+                        <div style={{ display: 'flex', alignItems: 'center', width: '100%', marginBottom: 20 }}>
+                            <div style={{ flex: 1, height: 1, background: '#eee' }}></div>
+                            <span style={{ color: '#9CA3AF', fontSize: 12, margin: '0 20px' }}>或</span>
+                            <div style={{ flex: 1, height: 1, background: '#eee' }}></div>
+                        </div>
+                        
+                        <button onClick={handleCreate} style={{ width: '100%', padding: '16px', background: 'white', color: '#4A403A', border: '1px solid #eee', borderRadius: 16, fontSize: 16, fontWeight: 'bold' }} className="btn">
+                            创建新小窝
+                        </button>
                     </div>
                 );
             }
 
-            // 创建页
+            // 创建页面
             if (view === 'create') {
                 return (
-                    <div className="h-full flex flex-col items-center justify-center bg-[#FDFBF7] p-6">
-                        <div className="w-20 h-20 rounded-full bg-[#E8CFC8]/20 flex items-center justify-center mb-6">
-                            <div className="w-10 h-10 bg-[#E8CFC8] rounded-full animate-pulse"></div>
+                    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 30, background: '#FDFBF7' }}>
+                        <div style={{ width: 70, height: 70, borderRadius: '50%', background: '#E8CFC8', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 30 }}>
+                            <div style={{ width: 25, height: 25, background: '#fff', borderRadius: '50%' }}></div>
                         </div>
-                        <h1 className="text-3xl font-bold text-[#4A403A] mb-2">小窝已创建</h1>
-                        <p className="text-gray-400 mb-8 text-sm text-center">把暗号发给TA，<br/>等待TA输入后一起进入小窝</p>
+                        <h1 style={{ fontSize: 28, fontWeight: 'bold', color: '#4A403A', marginBottom: 10 }}>小窝已创建</h1>
+                        <p style={{ color: '#9CA3AF', marginBottom: 30, fontSize: 14, textAlign: 'center', lineHeight: 1.8 }}>把暗号发给TA，<br/>等待TA输入后一起进入小窝</p>
                         
-                        <div className="w-full bg-white rounded-2xl p-6 text-center shadow-sm border border-[#E8CFC8]/20 mb-6">
-                            <p className="text-xs text-[#E8CFC8] mb-4 font-bold">分享给TA</p>
-                            <div onClick={() => copyCode(myCode)} className="bg-[#FDFBF7] p-6 rounded-xl cursor-pointer border-2 border-dashed border-[#E8CFC8]/30 jelly-btn">
-                                <p className="text-3xl font-mono font-bold text-[#4A403A]" style={{letterSpacing: '8px'}}>{myCode}</p>
-                                <p className="text-xs text-gray-400 mt-3">点击复制</p>
+                        <div style={{ width: '100%', background: 'white', borderRadius: 20, padding: 25, marginBottom: 20, textAlign: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
+                            <p style={{ color: '#E8CFC8', fontSize: 12, marginBottom: 15, fontWeight: 'bold' }}>分享给TA</p>
+                            <div onClick={() => copyCode(myCode)} style={{ background: '#FDFBF7', padding: 25, borderRadius: 12, border: '2px dashed #E8CFC8', cursor: 'pointer' }}>
+                                <p className="input-code" style={{ color: '#4A403A' }}>{myCode}</p>
+                                <p style={{ color: '#9CA3AF', fontSize: 12, marginTop: 10 }}>点击复制</p>
                             </div>
                         </div>
                         
-                        <div className="w-full">
-                            {connStatus === 'waiting' ? (
-                                <div className="flex items-center justify-center gap-2 text-sm text-gray-500 bg-white/60 px-4 py-3 rounded-full">
-                                    <div className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></div>
-                                    <span>等待TA输入暗号...</span>
+                        <div style={{ width: '100%' }}>
+                            {connStatus === 'waiting' && (
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: 15, background: 'rgba(255,255,255,0.6)', borderRadius: 30 }}>
+                                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#FBBF24', animation: 'heartbeat 1s infinite' }}></div>
+                                    <span style={{ color: '#6B7280', fontSize: 14 }}>等待TA输入暗号...</span>
                                 </div>
-                            ) : connStatus === 'connected' ? (
-                                <div className="flex items-center justify-center gap-2 text-sm text-green-500 bg-green-50 px-4 py-3 rounded-full">
-                                    <Icons.Check />
-                                    <span>连接成功！</span>
+                            )}
+                            {connStatus === 'connected' && (
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: 15, background: '#ECFDF5', borderRadius: 30 }}>
+                                    <Icon type="check" />
+                                    <span style={{ color: '#10B981', fontSize: 14 }}>连接成功！</span>
                                 </div>
-                            ) : (
-                                <div className="flex items-center justify-center gap-2 text-sm text-gray-400 bg-white/60 px-4 py-3 rounded-full">
-                                    <span>等待中...</span>
+                            )}
+                            {connStatus === 'disconnected' && (
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: 15, background: 'rgba(255,255,255,0.6)', borderRadius: 30 }}>
+                                    <span style={{ color: '#9CA3AF', fontSize: 14 }}>等待中...</span>
                                 </div>
                             )}
                         </div>
                         
-                        <button onClick={() => { cleanup(); setView('login'); }} className="mt-6 text-sm text-gray-400 jelly-btn">
+                        <button onClick={() => { cleanup(); setView('login'); }} style={{ marginTop: 30, color: '#9CA3AF', fontSize: 14, background: 'transparent', border: 'none' }} className="btn">
                             返回重新创建
                         </button>
                     </div>
                 );
             }
 
-            // 加载页
+            // 主页
+            const days = getDays(anniversary);
+            const timeline = [...messages.map(m => ({...m, type: 'msg'})), ...todos.map(t => ({...t, type: 'todo'}))].sort((a, b) => b.ts - a.ts);
+
             return (
-                <div className="h-full flex flex-col items-center justify-center bg-[#FDFBF7]">
-                    <div className="w-16 h-16 rounded-full bg-[#E8CFC8]/20 flex items-center justify-center">
-                        <div className="w-8 h-8 bg-[#E8CFC8] rounded-full animate-pulse"></div>
+                <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#FDFBF7' }}>
+                    {/* 顶部 */}
+                    <header style={{ padding: '40px 20px 15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <div style={{ 
+                                width: 10, height: 10, borderRadius: '50%', 
+                                background: connStatus === 'connected' ? '#10B981' : connStatus === 'connecting' ? '#FBBF24' : '#9CA3AF',
+                                animation: connStatus === 'connected' ? 'heartbeat 2s infinite' : 'none'
+                            }}></div>
+                            <span style={{ fontSize: 12, color: '#6B7280' }}>
+                                {connStatus === 'connected' ? 'TA 在线' : connStatus === 'connecting' ? '连接中...' : connStatus === 'waiting' ? '等待对方...' : '离线'}
+                            </span>
+                        </div>
+                        <div style={{ display: 'flex', gap: 10 }}>
+                            {connStatus !== 'connected' && (
+                                <button onClick={() => partnerId && initPeer(myId, partnerId)} style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none' }} className="btn">
+                                    <Icon type="refresh" />
+                                </button>
+                            )}
+                            <button onClick={() => setShowSettings(true)} style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none' }} className="btn">
+                                <Icon type="setting" />
+                            </button>
+                        </div>
+                    </header>
+
+                    {/* 纪念日卡片 */}
+                    <div style={{ padding: '0 20px 20px' }}>
+                        <div style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(12px)', borderRadius: 24, padding: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.03)' }}>
+                            <div>
+                                <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
+                                    <span style={{ fontSize: 12, color: '#6B7280' }}>相爱</span>
+                                    <span style={{ fontSize: 36, fontWeight: 'bold', color: '#4A403A' }}>{days}</span>
+                                    <span style={{ fontSize: 18, color: '#6B7280' }}>天</span>
+                                </div>
+                                <p style={{ fontSize: 12, color: '#9CA3AF', marginTop: 5 }}>
+                                    {anniversary ? '始于 ' + new Date(anniversary).toLocaleDateString('zh-CN') : '设置纪念日开始计时'}
+                                </p>
+                            </div>
+                            <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#E8CFC8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Icon type="heart" />
+                            </div>
+                        </div>
                     </div>
-                    <p className="text-gray-400 mt-4">加载中...</p>
+
+                    {/* 内容区 */}
+                    <main style={{ flex: 1, overflowY: 'auto', padding: '0 15px 120px' }}>
+                        {tab === 'home' && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                {timeline.length === 0 ? (
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '60px 0' }}>
+                                        <div style={{ fontSize: 48, marginBottom: 20 }}>🌱</div>
+                                        <p style={{ color: '#9CA3AF', textAlign: 'center', fontSize: 14, lineHeight: 1.8 }}>小窝还是空的，<br/>快去树洞或待办里留下点什么吧</p>
+                                        <div style={{ display: 'flex', gap: 15, marginTop: 25 }}>
+                                            <button onClick={() => setTab('msg')} style={{ padding: '10px 20px', background: 'rgba(232,207,200,0.2)', color: '#D4A5A5', borderRadius: 20, fontSize: 14, border: 'none' }} className="btn">去树洞</button>
+                                            <button onClick={() => setTab('todo')} style={{ padding: '10px 20px', background: 'rgba(212,228,230,0.2)', color: '#9CA3AF', borderRadius: 20, fontSize: 14, border: 'none' }} className="btn">去待办</button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    timeline.map((item, i) => (
+                                        <div key={i} style={{ 
+                                            animation: 'fadeIn 0.3s ease-out', 
+                                            animationDelay: `${Math.min(i * 0.05, 0.3)}s`,
+                                            opacity: 0,
+                                            animationFillMode: 'forwards'
+                                        }}>
+                                            {item.type === 'msg' ? (
+                                                <div style={{ display: 'flex', justifyContent: item.self ? 'flex-end' : 'flex-start' }}>
+                                                    <div style={{ 
+                                                        maxWidth: '75%', padding: '12px 16px', borderRadius: 20, fontSize: 14,
+                                                        background: item.self ? '#E8CFC8' : 'white',
+                                                        color: item.self ? 'white' : '#4A403A',
+                                                        borderBottomRightRadius: item.self ? 4 : 20,
+                                                        borderBottomLeftRadius: item.self ? 20 : 4
+                                                    }}>
+                                                        {item.text}
+                                                        <div style={{ fontSize: 10, marginTop: 5, opacity: 0.7 }}>{formatTime(item.ts)}</div>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div style={{ 
+                                                    display: 'flex', alignItems: 'center', gap: 10, padding: 10, borderRadius: 10,
+                                                    background: item.done ? 'rgba(255,255,255,0.3)' : 'rgba(232,207,200,0.2)',
+                                                    textDecoration: item.done ? 'line-through' : 'none',
+                                                    color: item.done ? '#9CA3AF' : '#4A403A',
+                                                    fontSize: 13
+                                                }}>
+                                                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: item.done ? '#9CA3AF' : '#E8CFC8', flexShrink: 0 }}></div>
+                                                    <span style={{ flex: 1 }}>{item.text}</span>
+                                                    <span style={{ fontSize: 11, opacity: 0.6 }}>{new Date(item.ts).toLocaleTimeString('zh-CN', {hour:'2-digit', minute:'2-digit'})}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        )}
+
+                        {tab === 'msg' && <TreeHole messages={messages} onSend={(text) => sendData('msg', { id: Date.now(), text, ts: Date.now() })} toast={showToast} />}
+
+                        {tab === 'todo' && <TodoList todos={todos} onAdd={(text) => sendData('todo', { id: Date.now(), text, done: false, ts: Date.now() })} />}
+                    </main>
+
+                    {/* 底部导航 */}
+                    <nav style={{ position: 'fixed', bottom: 0, left: 0, right: 0, padding: '15px 20px 35px', background: '#FDFBF7' }}>
+                        <div style={{ 
+                            background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(12px)', 
+                            borderRadius: 20, padding: '10px 20px', display: 'flex', justifyContent: 'space-around',
+                            boxShadow: '0 4px 20px rgba(0,0,0,0.05)'
+                        }}>
+                            <button onClick={() => setTab('todo')} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '8px 20px', background: 'transparent', border: 'none' }} className="btn">
+                                <Icon type="list" />
+                                <span style={{ fontSize: 10, marginTop: 4, color: tab === 'todo' ? '#E8CFC8' : '#9CA3AF' }}>待办</span>
+                            </button>
+                            <button onClick={() => setTab('msg')} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '8px 20px', background: 'transparent', border: 'none' }} className="btn">
+                                <Icon type="msg" />
+                                <span style={{ fontSize: 10, marginTop: 4, color: tab === 'msg' ? '#E8CFC8' : '#9CA3AF' }}>树洞</span>
+                            </button>
+                            <button onClick={() => setTab('home')} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '8px 20px', background: 'transparent', border: 'none', marginTop: -25 }} className="btn">
+                                <div style={{ 
+                                    width: 50, height: 50, borderRadius: '50%', 
+                                    background: tab === 'home' ? '#E8CFC8' : 'white',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    boxShadow: tab === 'home' ? '0 4px 15px rgba(232,207,200,0.4)' : '0 4px 15px rgba(0,0,0,0.1)'
+                                }}>
+                                    <Icon type="heart" />
+                                </div>
+                                <span style={{ fontSize: 10, marginTop: 4, color: tab === 'home' ? '#E8CFC8' : '#9CA3AF' }}>时光</span>
+                            </button>
+                        </div>
+                    </nav>
+
+                    {/* 设置弹窗 */}
+                    {showSettings && (
+                        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(4px)', zIndex: 100, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+                            <div style={{ background: '#FDFBF7', width: '100%', maxWidth: 420, borderRadius: '24px 24px 0 0', padding: 25, animation: 'slideUp 0.3s ease-out' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 25 }}>
+                                    <h2 style={{ fontSize: 20, fontWeight: 'bold', color: '#4A403A' }}>小窝设置</h2>
+                                    <button onClick={() => setShowSettings(false)} style={{ width: 32, height: 32, borderRadius: '50%', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none' }} className="btn">
+                                        <Icon type="close" />
+                                    </button>
+                                </div>
+                                <div style={{ marginBottom: 25 }}>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 'bold', color: '#4A403A', marginBottom: 10 }}>
+                                        <Icon type="calendar" /> 纪念日
+                                    </label>
+                                    <input type="date" id="date-input" style={{ width: '100%', padding: 15, borderRadius: 12, border: '1px solid #eee', background: 'white', fontSize: 14 }} />
+                                </div>
+                                <button onClick={() => {
+                                    const d = document.getElementById('date-input').value;
+                                    if (d) {
+                                        const ts = new Date(d).getTime();
+                                        localStorage.setItem('yike_anniversary', ts);
+                                        setAnniversary(ts);
+                                    }
+                                    setShowSettings(false);
+                                }} style={{ width: '100%', padding: 16, background: '#E8CFC8', color: 'white', border: 'none', borderRadius: 16, fontSize: 16, fontWeight: 'bold', marginBottom: 15 }} className="btn">
+                                    保存设置
+                                </button>
+                                <button onClick={() => {
+                                    if (confirm('确定清空所有数据吗？')) {
+                                        Object.keys(localStorage).filter(k => k.startsWith('yike_')).forEach(k => localStorage.removeItem(k));
+                                        window.location.reload();
+                                    }
+                                }} style={{ width: '100%', padding: 12, background: 'transparent', color: '#EF4444', fontSize: 14, border: 'none' }} className="btn">
+                                    清空所有数据
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Toast */}
+                    {toast && (
+                        <div style={{ 
+                            position: 'fixed', top: 100, left: '50%', transform: 'translateX(-50%)',
+                            background: 'rgba(0,0,0,0.8)', color: 'white', padding: '10px 25px', borderRadius: 25,
+                            fontSize: 14, zIndex: 200, animation: 'fadeIn 0.2s ease-out'
+                        }}>
+                            {toast}
+                        </div>
+                    )}
                 </div>
             );
         }
 
-        // ============ 树洞组件 ============
-        function TreeHole({ messages, onSend }) {
+        // 树洞组件
+        function TreeHole({ messages, onSend, toast }) {
             const [text, setText] = useState('');
             const bottomRef = useRef(null);
 
@@ -782,50 +671,68 @@
             };
 
             return (
-                <div className="flex flex-col h-full pb-24">
-                    <div className="flex-1 overflow-y-auto space-y-3 hide-scrollbar">
+                <div style={{ display: 'flex', flexDirection: 'column', height: '100%', paddingBottom: 80 }}>
+                    <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
                         {messages.map(m => (
-                            <div key={m.id} className={`flex ${m.self ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm ${m.self ? 'bg-[#E8CFC8] text-white rounded-br-sm' : 'bg-white text-[#4A403A] rounded-bl-sm'}`}>
+                            <div key={m.id} style={{ display: 'flex', justifyContent: m.self ? 'flex-end' : 'flex-start' }}>
+                                <div style={{ 
+                                    maxWidth: '75%', padding: '12px 16px', borderRadius: 20, fontSize: 14,
+                                    background: m.self ? '#E8CFC8' : 'white',
+                                    color: m.self ? 'white' : '#4A403A',
+                                    borderBottomRightRadius: m.self ? 4 : 20,
+                                    borderBottomLeftRadius: m.self ? 20 : 4
+                                }}>
                                     {m.text}
-                                    <div className={`text-[10px] mt-1 ${m.self ? 'text-white/70' : 'text-gray-400'}`}>{formatTime(m.ts)}</div>
+                                    <div style={{ fontSize: 10, marginTop: 5, opacity: 0.7 }}>{formatTime(m.ts)}</div>
                                 </div>
                             </div>
                         ))}
                         {messages.length === 0 && (
-                            <div className="flex flex-col items-center justify-center mt-20">
-                                <div className="text-5xl mb-4">📮</div>
-                                <p className="text-gray-400 text-sm">树洞空空荡荡...</p>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginTop: 60 }}>
+                                <div style={{ fontSize: 40, marginBottom: 15 }}>📮</div>
+                                <p style={{ color: '#9CA3AF', fontSize: 14 }}>树洞空空荡荡...</p>
                             </div>
                         )}
                         <div ref={bottomRef} />
                     </div>
-                    <div className="fixed bottom-20 left-0 right-0 px-4">
-                        <div className="flex gap-2 bg-white/80 backdrop-blur p-2 rounded-full shadow-sm border border-white/50">
-                            <input 
-                                className="flex-1 px-4 py-2 outline-none text-sm bg-transparent"
-                                placeholder="说点什么..."
-                                value={text}
-                                onChange={e => setText(e.target.value)}
-                                onKeyDown={e => e.key === 'Enter' && handleSend()}
-                            />
-                            <button 
-                                onClick={handleSend}
-                                disabled={!text.trim()}
-                                className={`w-10 h-10 rounded-full flex items-center justify-center ${text.trim() ? 'bg-[#E8CFC8] text-white' : 'bg-gray-100 text-gray-300'}`}
-                            >
-                                <Icons.Send />
-                            </button>
-                        </div>
+                    <div style={{ 
+                        position: 'fixed', bottom: 100, left: 15, right: 15,
+                        background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(8px)',
+                        borderRadius: 30, padding: 8, display: 'flex', gap: 10,
+                        boxShadow: '0 2px 15px rgba(0,0,0,0.05)'
+                    }}>
+                        <input 
+                            style={{ flex: 1, padding: '12px 15px', background: 'transparent', border: 'none', outline: 'none', fontSize: 14 }}
+                            placeholder="说点什么..."
+                            value={text}
+                            onChange={e => setText(e.target.value)}
+                            onKeyDown={e => e.key === 'Enter' && handleSend()}
+                        />
+                        <button 
+                            onClick={handleSend}
+                            disabled={!text.trim()}
+                            style={{ 
+                                width: 42, height: 42, borderRadius: '50%', 
+                                background: text.trim() ? '#E8CFC8' : '#f3f4f6',
+                                color: text.trim() ? 'white' : '#9CA3AF',
+                                border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                            }}
+                            className="btn"
+                        >
+                            <Icon type="send" />
+                        </button>
                     </div>
                 </div>
             );
         }
 
-        // ============ 待办组件 ============
+        // 待办组件
         function TodoList({ todos, onAdd }) {
             const [text, setText] = useState('');
             const [showDelete, setShowDelete] = useState(false);
+            const [localTodos, setLocalTodos] = useState(todos);
+
+            useEffect(() => { setLocalTodos(todos); }, [todos]);
 
             const handleAdd = () => {
                 if (!text.trim()) return;
@@ -834,74 +741,75 @@
             };
 
             const toggleTodo = (todo) => {
-                const newTodos = todos.map(t => 
-                    t.id === todo.id ? { ...t, done: !t.done } : t
-                );
+                const newTodos = localTodos.map(t => t.id === todo.id ? { ...t, done: !t.done } : t);
+                setLocalTodos(newTodos);
                 localStorage.setItem('yike_todos', JSON.stringify(newTodos));
-                // 这里应该通过 sendData 发送，但为简化直接在组件处理
-                window.dispatchEvent(new CustomEvent('update-todos', { detail: newTodos }));
             };
 
             const deleteTodo = (id) => {
-                const newTodos = todos.filter(t => t.id !== id);
+                const newTodos = localTodos.filter(t => t.id !== id);
+                setLocalTodos(newTodos);
                 localStorage.setItem('yike_todos', JSON.stringify(newTodos));
-                window.dispatchEvent(new CustomEvent('update-todos', { detail: newTodos }));
             };
 
             return (
-                <div className="space-y-3 pb-24">
-                    <div className="flex gap-2">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 15 }}>
+                    <div style={{ display: 'flex', gap: 10 }}>
                         <input 
-                            className="flex-1 p-3 rounded-xl bg-white border border-gray-100 outline-none text-sm"
+                            style={{ flex: 1, padding: 14, borderRadius: 12, border: '1px solid #eee', background: 'white', outline: 'none', fontSize: 14 }}
                             placeholder="添加小事..."
                             value={text}
                             onChange={e => setText(e.target.value)}
                             onKeyDown={e => e.key === 'Enter' && handleAdd()}
                         />
-                        <button onClick={handleAdd} className="w-12 h-12 rounded-xl bg-[#E8CFC8] text-white flex items-center justify-center jelly-btn">
-                            <Icons.Plus />
+                        <button onClick={handleAdd} style={{ width: 48, height: 48, borderRadius: 12, background: '#E8CFC8', color: 'white', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="btn">
+                            <Icon type="plus" />
                         </button>
-                        <button onClick={() => setShowDelete(!showDelete)} className={`w-12 h-12 rounded-xl flex items-center justify-center jelly-btn ${showDelete ? 'bg-red-100 text-red-400' : 'bg-white border border-gray-100'}`}>
-                            <Icons.Trash />
+                        <button onClick={() => setShowDelete(!showDelete)} style={{ width: 48, height: 48, borderRadius: 12, background: showDelete ? '#FEE2E2' : 'white', color: showDelete ? '#EF4444' : '#9CA3AF', border: '1px solid #eee', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="btn">
+                            <Icon type="trash" />
                         </button>
                     </div>
-                    <div className="space-y-2">
-                        {todos.map(todo => (
-                            <div key={todo.id} className={`flex items-center gap-3 p-3 rounded-xl transition-all ${showDelete ? 'bg-red-50' : 'bg-white/80'}`}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        {localTodos.map(todo => (
+                            <div key={todo.id} style={{ 
+                                display: 'flex', alignItems: 'center', gap: 12, padding: 14, borderRadius: 12,
+                                background: showDelete ? '#FEE2E2' : 'rgba(255,255,255,0.8)'
+                            }}>
                                 <button 
                                     onClick={() => toggleTodo(todo)}
-                                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 jelly-btn ${todo.done ? 'bg-[#D4E4E6] border-[#D4E4E6]' : 'border-gray-300'}`}
+                                    style={{ 
+                                        width: 24, height: 24, borderRadius: '50%', border: '2px solid', 
+                                        borderColor: todo.done ? '#D4E4E6' : '#d1d5db',
+                                        background: todo.done ? '#D4E4E6' : 'transparent',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                                    }}
+                                    className="btn"
                                 >
-                                    {todo.done && <Icons.Check />}
+                                    {todo.done && <Icon type="check" />}
                                 </button>
-                                <span className={`flex-1 text-sm ${todo.done ? 'line-through text-gray-400' : 'text-[#4A403A]'}`}>
+                                <span style={{ flex: 1, fontSize: 14, textDecoration: todo.done ? 'line-through' : 'none', color: todo.done ? '#9CA3AF' : '#4A403A' }}>
                                     {todo.text}
                                 </span>
                                 {showDelete && (
-                                    <button onClick={() => deleteTodo(todo.id)} className="p-2 text-red-400 jelly-btn">
-                                        <Icons.Trash />
+                                    <button onClick={() => deleteTodo(todo.id)} style={{ color: '#EF4444', background: 'transparent', border: 'none', padding: 5 }} className="btn">
+                                        <Icon type="trash" />
                                     </button>
                                 )}
                             </div>
                         ))}
                     </div>
-                    {todos.length === 0 && (
-                        <div className="flex flex-col items-center justify-center mt-16">
-                            <div className="text-5xl mb-4">✨</div>
-                            <p className="text-gray-400 text-sm">还没有待办事项</p>
+                    {localTodos.length === 0 && (
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginTop: 40 }}>
+                            <div style={{ fontSize: 40, marginBottom: 15 }}>✨</div>
+                            <p style={{ color: '#9CA3AF', fontSize: 14 }}>还没有待办事项</p>
                         </div>
                     )}
                 </div>
             );
         }
 
-        // 监听待办更新
-        window.addEventListener('update-todos', (e) => {
-            // 在实际应用中应该更新状态，这里简化处理
-        });
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        // 渲染
+        ReactDOM.createRoot(document.getElementById('app')).render(<App />);
     </script>
 </body>
 </html>
