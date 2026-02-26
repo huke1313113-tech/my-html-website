@@ -4,13 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>伊可 Yike | 情侣小窝</title>
-    
-    <style>
-        @font-face {
-            font-family: 'YikeFont';
-            src: local('PingFang SC'), local('Microsoft YaHei'), local('Helvetica Neue'), local('sans-serif');
-        }
-    </style>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -18,44 +11,34 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ['YikeFont', 'sans-serif'] },
+                    fontFamily: { sans: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'sans-serif'] },
                     colors: {
                         bg: '#FDFBF7',
-                        primary: '#D4A5A5',
-                        primaryLight: '#E8CFC8',
-                        secondary: '#A8B5B8',
-                        secondaryLight: '#C5D6D8',
-                        accent: '#B8C9BC',
-                        accentLight: '#D4E4DE',
-                        yellowLight: '#F5EFE0',
-                        text: '#5C5552',
-                        textLight: '#9E9591',
+                        primary: '#E8CFC8',
+                        primaryDark: '#D4A5A5',
+                        secondary: '#D4E4E6',
+                        secondaryLight: '#E8F0F2',
+                        text: '#4A403A',
+                        textLight: '#9CA3AF',
                         textLighter: '#C4BEB9',
-                        danger: '#D98181',
-                        success: '#A8C9A8',
-                        homeBg: '#FDFBF7',
-                        treeholeBg: '#FAF5F0',
-                        todoBg: '#F5F7F5',
                     },
                     animation: {
-                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'fade-in': 'fadeIn 0.3s ease-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
                         'float': 'float 3s ease-in-out infinite',
-                        'pulse-soft': 'pulse 3s ease-in-out infinite',
-                        'slide-up': 'slideUp 0.4s ease-out',
-                        'bounce-soft': 'bounceSoft 1s ease-out',
+                        'pulse-soft': 'pulse 2s ease-in-out infinite',
                     },
                     keyframes: {
                         fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
-                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
-                        slideUp: { '0%': { transform: 'translateY(20px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } },
-                        bounceSoft: { '0%, 100%': { transform: 'scale(1)' }, '50%': { transform: 'scale(1.05)' } },
+                        slideUp: { '0%': { transform: 'translateY(15px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } },
+                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-8px)' } },
                     }
                 }
             }
         }
     </script>
-    
-    <!-- 核心依赖库 -->
+
+    <!-- 核心依赖库 - 使用国内稳定CDN -->
     <script src="https://cdn.staticfile.net/react/18.2.0/umd/react.production.min.js"></script>
     <script src="https://cdn.staticfile.net/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdn.staticfile.net/babel-standalone/7.23.5/babel.min.js"></script>
@@ -63,45 +46,32 @@
 
     <style>
         body { background: #E5E7EB; display: flex; justify-content: center; margin: 0; min-height: 100vh; }
-        #app { width: 100%; max-width: 420px; height: 100dvh; background: #FDFBF7; position: relative; overflow: hidden; box-shadow: 0 0 60px rgba(0,0,0,0.08); }
-        .glass { background: rgba(255,255,255,0.75); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.6); }
+        #app-container { width: 100%; max-width: 400px; height: 100dvh; background: #FDFBF7; position: relative; overflow: hidden; box-shadow: 0 0 60px rgba(0,0,0,0.08); }
+        .glass { background: rgba(255,255,255,0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.6); }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        .recording-wave { animation: wave 0.8s ease-in-out infinite; }
-        @keyframes wave { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(1.6); } }
+        @keyframes heartbeat { 0%, 100% { transform: scale(1); } 14% { transform: scale(1.15); } 28% { transform: scale(1); } 42% { transform: scale(1.15); } 70% { transform: scale(1); } }
+        .heartbeat { animation: heartbeat 1.6s ease-in-out infinite; }
         
-        @keyframes heartbeat { 0%, 100% { transform: scale(1); } 14% { transform: scale(1.1); } 28% { transform: scale(1); } 42% { transform: scale(1.1); } 70% { transform: scale(1); } }
-        .heartbeat { animation: heartbeat 1.5s ease-in-out infinite; }
-        
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .spin { animation: spin 1s linear infinite; }
-        
-        @keyframes pulse-ring { 0% { transform: scale(0.8); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
-        .pulse-ring::before { content: ''; position: absolute; inset: 0; border-radius: 50%; border: 2px solid currentColor; animation: pulse-ring 1.5s ease-out infinite; }
-        
-        .jelly-btn { transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .jelly-btn { transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1); }
         .jelly-btn:active { transform: scale(0.94); }
         
-        .scale-in { animation: scaleIn 0.3s ease-out; }
-        @keyframes scaleIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .input-code { font-size: 24px; letter-spacing: 8px; font-family: 'Courier New', monospace; font-weight: bold; }
         
-        @keyframes connect-pulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.4); }
-            50% { box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }
-        }
+        @keyframes connect-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(168, 201, 168, 0.4); } 50% { box-shadow: 0 0 0 12px rgba(168, 201, 168, 0); } }
         .connect-success { animation: connect-pulse 2s infinite; }
     </style>
 </head>
 <body>
-    <div id="app">
+    <div id="app-container">
         <div id="root"></div>
     </div>
 
     <script type="text/babel">
         const { useState, useEffect, useRef, useCallback, useMemo } = React;
 
-        // --- 工具函数 ---
+        // ============ 工具函数 ============
         const generateId = () => Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
         const formatTime = (ts) => {
             if (!ts) return '';
@@ -122,13 +92,32 @@
             return Math.floor((now - start) / (1000 * 60 * 60 * 24));
         };
 
-        // --- 存储工具 ---
+        // ============ 本地存储工具 ============
         const Storage = {
-            get: (key) => JSON.parse(localStorage.getItem(key) || '[]'),
-            set: (key, val) => localStorage.setItem(key, JSON.stringify(val)),
+            get: (key) => {
+                try {
+                    return JSON.parse(localStorage.getItem(key) || '[]');
+                } catch { return []; }
+            },
+            set: (key, val) => {
+                try {
+                    localStorage.setItem(key, JSON.stringify(val));
+                } catch(e) {}
+            },
+            remove: (key) => {
+                try {
+                    localStorage.removeItem(key);
+                } catch(e) {}
+            },
+            clearAll: () => {
+                try {
+                    const keys = Object.keys(localStorage).filter(k => k.startsWith('yike_'));
+                    keys.forEach(k => localStorage.removeItem(k));
+                } catch(e) {}
+            }
         };
 
-        // --- 图标库 ---
+        // ============ 图标库 ============
         const Icons = {
             Heart: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="1.5"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>,
             Home: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
@@ -138,30 +127,30 @@
             Send: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>,
             Check: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>,
             Setting: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
-            Mic: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>,
-            MicOff: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>,
             Trash: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>,
-            Clock: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
-            Calendar: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
-            Close: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
-            Copy: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>,
-            Play: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>,
-            Delete: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>,
             Refresh: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>,
-            FileAudio: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>,
-            Sparkle: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z"/></svg>,
-            Link: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>,
+            Close: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+            Calendar: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+            Copy: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>,
+            Star: ({className}) => <svg className={className} viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
         };
 
-        // ================= 主应用 =================
+        // ============ 生成6位数字暗号 ============
+        const generateCode = () => {
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        };
+
+        // ============ 主应用组件 ============
         function App() {
-            const [view, setView] = useState('login');
+            const [view, setView] = useState('loading');
             const [tab, setTab] = useState('home');
             const [showSettings, setShowSettings] = useState(false);
             const [toast, setToast] = useState(null);
             
             const [myId, setMyId] = useState('');
+            const [myCode, setMyCode] = useState('');
             const [partnerId, setPartnerId] = useState('');
+            const [partnerCode, setPartnerCode] = useState('');
             const [anniversary, setAnniversary] = useState(null);
             const [messages, setMessages] = useState([]);
             const [todos, setTodos] = useState([]);
@@ -171,158 +160,215 @@
             const [connectError, setConnectError] = useState(null);
             const peerRef = useRef(null);
             const reconnectTimerRef = useRef(null);
+            const isMountedRef = useRef(false);
 
             // 初始化
             useEffect(() => {
-                let savedMyId = localStorage.getItem('yike_myId');
-                const savedPartner = localStorage.getItem('yike_partnerId');
+                isMountedRef.current = true;
+                
+                // 读取本地存储
+                const savedMyId = localStorage.getItem('yike_myId');
+                const savedPartnerId = localStorage.getItem('yike_partnerId');
                 const savedAnniversary = localStorage.getItem('yike_anniversary');
+                const savedMsgs = Storage.get('yike_msgs');
+                const savedTodos = Storage.get('yike_todos');
 
                 if (savedAnniversary) setAnniversary(Number(savedAnniversary));
+                if (savedMsgs) setMessages(savedMsgs);
+                if (savedTodos) setTodos(savedTodos);
 
-                if (!savedMyId) {
-                    savedMyId = generateId();
-                    localStorage.setItem('yike_myId', savedMyId);
+                // 生成或读取我的ID和暗号
+                let finalMyId = savedMyId;
+                let finalMyCode = localStorage.getItem('yike_myCode');
+                if (!finalMyId) {
+                    finalMyId = generateId();
+                    finalMyCode = generateCode();
+                    localStorage.setItem('yike_myId', finalMyId);
+                    localStorage.setItem('yike_myCode', finalMyCode);
                 }
-                setMyId(savedMyId);
+                if (!finalMyCode) {
+                    finalMyCode = generateCode();
+                    localStorage.setItem('yike_myCode', finalMyCode);
+                }
+                setMyId(finalMyId);
+                setMyCode(finalMyCode);
 
-                if (savedPartner) {
-                    setPartnerId(savedPartner);
-                    setMessages(Storage.get('yike_msgs'));
-                    setTodos(Storage.get('yike_todos'));
+                // 检查是否已配对
+                if (savedPartnerId) {
+                    setPartnerId(savedPartnerId);
+                    const savedPartnerCode = localStorage.getItem('yike_partnerCode');
+                    if (savedPartnerCode) setPartnerCode(savedPartnerCode);
+                    
+                    // 自动进入主页
                     setView('home');
-                    // 延迟连接
-                    setTimeout(() => initPeer(savedMyId, savedPartner), 500);
+                    
+                    // 后台静默重连（带5秒超时）
+                    setTimeout(() => {
+                        initPeerWithTimeout(finalMyId, savedPartnerId);
+                    }, 300);
                 } else {
                     setView('login');
                 }
 
                 return () => {
-                    if (peerRef.current) try { peerRef.current.destroy(); } catch(e) {}
-                    if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
+                    isMountedRef.current = false;
+                    cleanupPeer();
                 };
             }, []);
 
-            // PeerJS 连接 - 优化版
-            const initPeer = useCallback((id, pid) => {
-                if (!pid) return;
-                
-                // 清理旧连接
+            // 清理 PeerJS 连接
+            const cleanupPeer = useCallback(() => {
                 if (peerRef.current) {
-                    try { peerRef.current.destroy(); } catch(e) {}
+                    try {
+                        peerRef.current.destroy();
+                    } catch(e) {}
                     peerRef.current = null;
                 }
                 if (reconnectTimerRef.current) {
                     clearTimeout(reconnectTimerRef.current);
                     reconnectTimerRef.current = null;
                 }
+            }, []);
+
+            // 带超时的 PeerJS 初始化
+            const initPeerWithTimeout = useCallback((id, pid) => {
+                if (!pid || !isMountedRef.current) return;
                 
-                setConnStatus('connecting');
+                cleanupPeer();
                 setConnectError(null);
-                console.log('Initializing Peer:', id, '->', pid);
+                setConnStatus('connecting');
+                console.log('🔄 初始化连接:', { myId: id, partnerId: pid });
+
+                // 5秒超时强制退出
+                const timeoutId = setTimeout(() => {
+                    if (!isMountedRef.current) return;
+                    console.log('⏱️ 连接超时');
+                    cleanupPeer();
+                    setConnStatus('disconnected');
+                    setConnectError('连接超时，可能是网络问题，请检查后重试');
+                }, 5000);
 
                 try {
-                    // 更稳定的 PeerJS 配置
                     const peer = new Peer(id, {
-                        debug: 0,
+                        debug: 1,
                         config: {
                             iceServers: [
                                 { urls: 'stun:stun.l.google.com:19302' },
                                 { urls: 'stun:stun1.l.google.com:19302' },
-                                { urls: 'stun:stun2.l.google.com:19302' },
                             ]
                         }
                     });
                     peerRef.current = peer;
 
-                    // 20秒超时
-                    const timeoutId = setTimeout(() => {
-                        if (peerRef.current === peer) {
-                            console.log('Connection timeout');
-                            try { peer.destroy(); } catch(e) {}
-                            peerRef.current = null;
-                            setConnStatus('disconnected');
-                            setConnectError('连接超时，请检查网络后重试');
+                    // Peer 打开成功
+                    peer.on('open', (peerId) => {
+                        console.log('✅ Peer 打开:', peerId);
+                        if (!isMountedRef.current) {
+                            clearTimeout(timeoutId);
+                            return;
                         }
-                    }, 20000);
-
-                    peer.on('open', () => {
-                        console.log('Peer opened');
-                        clearTimeout(timeoutId);
                         setConnStatus('waiting');
+                        
+                        // 延迟一点再发起连接，给对方时间
+                        setTimeout(() => {
+                            if (peerRef.current === peer && !conn && isMountedRef.current) {
+                                console.log('🔗 发起连接到:', pid);
+                                const connection = peer.connect(pid, { 
+                                    reliable: true, 
+                                    serialization: 'json'
+                                });
+                                setupConnection(connection, timeoutId);
+                            }
+                        }, 800);
                     });
 
+                    // 收到传入连接
                     peer.on('connection', (connection) => {
-                        console.log('Incoming connection');
+                        console.log('📥 收到连接请求');
+                        if (!isMountedRef.current) {
+                            clearTimeout(timeoutId);
+                            return;
+                        }
                         clearTimeout(timeoutId);
                         setupConnection(connection);
                     });
 
+                    // 错误处理
                     peer.on('error', (err) => {
-                        console.error('Peer Error:', err);
+                        console.error('❌ Peer 错误:', err);
+                        if (!isMountedRef.current) return;
                         clearTimeout(timeoutId);
-                        try { peer.destroy(); } catch(e) {}
-                        peerRef.current = null;
+                        cleanupPeer();
                         
+                        let errorMsg = '连接失败，请重试';
                         if (err.type === 'peer-unavailable') {
-                            setConnectError('暗号无效或对方已离线，请确认对方已创建小窝');
-                            setConnStatus('disconnected');
+                            errorMsg = '对方暂不在线，请稍后再试';
                         } else if (err.type === 'unavailable-id') {
-                            setConnectError('暗号已被占用，请刷新页面重新生成');
-                            setConnStatus('disconnected');
-                        } else {
-                            setConnStatus('disconnected');
-                            setConnectError('连接失败，请重试');
+                            errorMsg = '暗号已被占用，请重新生成';
+                        } else if (err.type === 'network') {
+                            errorMsg = '网络连接失败，请检查网络';
                         }
+                        setConnStatus('disconnected');
+                        setConnectError(errorMsg);
                     });
 
-                    // 发起连接
-                    setTimeout(() => {
-                        if (peerRef.current === peer && peer.open && pid) {
-                            console.log('Attempting to connect to:', pid);
-                            const connection = peer.connect(pid, { 
-                                reliable: true, 
-                                serialization: 'json',
-                                metadata: { from: id }
-                            });
-
-                            connection.on('open', () => {
-                                console.log('Connection established');
-                                clearTimeout(timeoutId);
-                                setupConnection(connection);
-                            });
-
-                            connection.on('error', (err) => {
-                                console.error('Connection error:', err);
-                                // 继续等待对方连接
-                            });
-                        }
-                    }, 1000);
-
                 } catch (e) {
-                    console.error('Peer init error:', e);
+                    console.error('❌ 初始化失败:', e);
+                    if (!isMountedRef.current) return;
+                    clearTimeout(timeoutId);
                     setConnStatus('disconnected');
                     setConnectError('初始化失败，请刷新页面重试');
                 }
-            }, []);
+            }, [conn, cleanupPeer]);
 
-            const setupConnection = (c) => {
-                console.log('Connection established!');
-                setConn(c);
-                setConnStatus('connected');
-                setConnectError(null);
-                showToast('❤️ 连接成功');
+            // 设置连接
+            const setupConnection = useCallback((connection, timeoutId = null) => {
+                if (!isMountedRef.current) {
+                    if (timeoutId) clearTimeout(timeoutId);
+                    return;
+                }
+                if (timeoutId) clearTimeout(timeoutId);
 
-                c.on('data', (data) => {
-                    console.log('Received:', data.type);
-                    if (data.type === 'msg') {
+                console.log('🤝 连接建立中...');
+                
+                connection.on('open', () => {
+                    console.log('✅ 连接成功！');
+                    if (!isMountedRef.current) return;
+                    setConn(connection);
+                    setConnStatus('connected');
+                    setConnectError(null);
+                    
+                    // 发送握手消息
+                    connection.send({ 
+                        type: 'handshake', 
+                        payload: { myId, timestamp: Date.now() }
+                    });
+                });
+
+                connection.on('data', (data) => {
+                    console.log('📨 收到数据:', data.type);
+                    if (!isMountedRef.current) return;
+                    
+                    if (data.type === 'handshake') {
+                        // 回复握手
+                        if (connection.open) {
+                            connection.send({ 
+                                type: 'handshake-ack', 
+                                payload: { myId, timestamp: Date.now() } 
+                            });
+                        }
+                        setConnStatus('connected');
+                        showToast('❤️ 已连接');
+                    } else if (data.type === 'handshake-ack') {
+                        showToast('❤️ 已连接');
+                    } else if (data.type === 'msg') {
                         const newMsg = data.payload;
                         setMessages(prev => {
                             const newMsgs = [...prev, newMsg];
                             Storage.set('yike_msgs', newMsgs);
                             return newMsgs;
                         });
-                        showToast('收到一条纸条');
+                        showToast('收到新消息');
                     } else if (data.type === 'todo') {
                         const newTodo = data.payload;
                         setTodos(prev => {
@@ -337,30 +383,36 @@
                     }
                 });
 
-                c.on('close', () => {
-                    console.log('Connection closed');
+                connection.on('close', () => {
+                    console.log('🔴 连接断开');
+                    if (!isMountedRef.current) return;
                     setConnStatus('disconnected');
                     setConn(null);
                     showToast('连接已断开');
-                    // 自动重连
+                    
+                    // 3秒后自动重连
                     reconnectTimerRef.current = setTimeout(() => {
-                        if (partnerId) {
-                            console.log('Auto reconnecting...');
-                            initPeer(myId, partnerId);
+                        if (partnerId && isMountedRef.current) {
+                            initPeerWithTimeout(myId, partnerId);
                         }
                     }, 3000);
                 });
-            };
 
-            const handleReconnect = () => {
-                const pid = localStorage.getItem('yike_partnerId');
-                if (pid) {
+                connection.on('error', (err) => {
+                    console.error('连接错误:', err);
+                    if (!isMountedRef.current) return;
+                });
+            }, [myId, partnerId, initPeerWithTimeout]);
+
+            const handleReconnect = useCallback(() => {
+                if (partnerId) {
                     showToast('正在重连...');
-                    initPeer(myId, pid);
+                    initPeerWithTimeout(myId, partnerId);
                 }
-            };
+            }, [partnerId, myId, initPeerWithTimeout]);
 
-            const sendData = (type, payload) => {
+            const sendData = useCallback((type, payload) => {
+                // 先保存到本地
                 if (type === 'msg') {
                     const newMsg = { ...payload, self: true };
                     setMessages(prev => {
@@ -380,43 +432,94 @@
                     localStorage.setItem('yike_anniversary', payload);
                 }
 
+                // 如果已连接，发送给对方
                 if (conn && conn.open) {
                     conn.send({ type, payload });
                 }
-            };
+            }, [conn]);
 
-            const showToast = (msg) => {
+            const showToast = useCallback((msg) => {
                 setToast(msg);
                 setTimeout(() => setToast(null), 2500);
-            };
+            }, []);
 
-            const getBgColor = () => {
-                switch(tab) {
-                    case 'msg': return 'bg-treeholeBg';
-                    case 'todo': return 'bg-todoBg';
-                    default: return 'bg-homeBg';
+            const handlePair = useCallback((code) => {
+                if (!code || code.length !== 6) {
+                    alert('请输入6位数字暗号');
+                    return;
                 }
-            };
+                
+                // 清除旧连接
+                cleanupPeer();
+                
+                // 保存对方的暗号
+                localStorage.setItem('yike_partnerCode', code);
+                setPartnerCode(code);
+                
+                // 计算对方的ID（暗号是对方ID的后6位）
+                // 实际逻辑：对方会用他们的暗号来监听，所以我们用暗号作为ID后缀来连接
+                const estimatedPartnerId = 'yike_' + code;
+                
+                // 先进入主页
+                localStorage.setItem('yike_partnerId', estimatedPartnerId);
+                setPartnerId(estimatedPartnerId);
+                setView('home');
+                
+                // 然后尝试连接
+                setTimeout(() => {
+                    initPeerWithTimeout(myId, estimatedPartnerId);
+                }, 500);
+            }, [myId, cleanupPeer, initPeerWithTimeout]);
+
+            const handleCreate = useCallback(() => {
+                // 清除旧连接
+                cleanupPeer();
+                
+                // 重新生成暗号为6位
+                const newCode = generateCode();
+                const newId = 'yike_' + newCode;
+                
+                // 保存新的ID和暗号
+                localStorage.setItem('yike_myId', newId);
+                localStorage.setItem('yike_myCode', newCode);
+                setMyId(newId);
+                setMyCode(newCode);
+                
+                setView('create');
+                
+                // 立即初始化 Peer 开始等待连接
+                setTimeout(() => {
+                    initPeerWithTimeout(newId, null);
+                }, 300);
+            }, [cleanupPeer, initPeerWithTimeout]);
 
             // 登录页
-            if (view === 'login') return (
-                <LoginView 
-                    myId={myId}
-                    connStatus={connStatus}
-                    connectError={connectError}
-                    onJoin={(pid) => {
-                        localStorage.setItem('yike_partnerId', pid);
-                        setPartnerId(pid);
-                        setMessages(Storage.get('yike_msgs'));
-                        setTodos(Storage.get('yike_todos'));
-                        setView('home');
-                        // 清除错误状态再连接
-                        setTimeout(() => initPeer(myId, pid), 100);
-                    }}
-                    onRefresh={handleReconnect}
-                    onRetry={() => initPeer(myId, partnerId)}
-                />
-            );
+            if (view === 'login') {
+                return (
+                    <LoginView 
+                        myCode={myCode}
+                        connStatus={connStatus}
+                        connectError={connectError}
+                        onPair={handlePair}
+                        onCreate={handleCreate}
+                    />
+                );
+            }
+
+            // 创建页
+            if (view === 'create') {
+                return (
+                    <CreateView 
+                        myCode={myCode}
+                        connStatus={connStatus}
+                        connectError={connectError}
+                        onBack={() => {
+                            cleanupPeer();
+                            setView('login');
+                        }}
+                    />
+                );
+            }
 
             // 首页
             const days = getDays(anniversary);
@@ -427,93 +530,84 @@
             }, [messages, todos]);
 
             return (
-                <div className={`h-full flex flex-col ${getBgColor()} relative overflow-hidden transition-colors duration-500`}>
+                <div className="h-full flex flex-col bg-[#FDFBF7] relative overflow-hidden">
                     
-                    {/* 背景 */}
-                    <div className="absolute inset-0 pointer-events-none">
-                        {tab === 'home' && (
-                            <>
-                                <div className="absolute top-[-15%] right-[-10%] w-[70%] h-[70%] rounded-full bg-primary/10 blur-[80px]"></div>
-                                <div className="absolute bottom-[-15%] left-[-10%] w-[70%] h-[70%] rounded-full bg-secondaryLight/30 blur-[80px]"></div>
-                            </>
-                        )}
-                        {tab === 'msg' && (
-                            <>
-                                <div className="absolute top-[-10%] right-[-20%] w-[80%] h-[80%] rounded-full bg-yellowLight/50 blur-[100px]"></div>
-                                <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-primary/10 blur-[80px]"></div>
-                            </>
-                        )}
-                        {tab === 'todo' && (
-                            <>
-                                <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-accentLight/50 blur-[80px]"></div>
-                                <div className="absolute bottom-[-10%] right-[-10%] w-[70%] h-[70%] rounded-full bg-secondaryLight/30 blur-[80px]"></div>
-                            </>
-                        )}
+                    {/* 动态背景光斑 */}
+                    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                        <div className="absolute top-[-20%] right-[-10%] w-[80%] h-[80%] rounded-full bg-[#E8CFC8]/20 blur-[100px] animate-float"></div>
+                        <div className="absolute bottom-[-20%] left-[-10%] w-[80%] h-[80%] rounded-full bg-[#D4E4E6]/20 blur-[100px] animate-float" style={{animationDelay: '1.5s'}}></div>
                     </div>
 
-                    {/* 顶部栏 */}
-                    <header className="relative z-10 px-6 pt-6 pb-3 flex justify-between items-center">
+                    {/* 顶部状态栏 */}
+                    <header className="relative z-10 px-5 pt-8 pb-3 flex justify-between items-center">
                         <div className="flex items-center gap-2">
                             <div className={`w-2.5 h-2.5 rounded-full transition-all duration-500 ${
-                                connStatus === 'connected' ? 'bg-success connect-success' : 
+                                connStatus === 'connected' ? 'bg-green-400 connect-success' : 
                                 connStatus === 'connecting' ? 'bg-yellow-400 animate-pulse' : 
                                 connStatus === 'waiting' ? 'bg-yellow-400 animate-pulse' : 'bg-gray-300'
                             }`}></div>
-                            <span className="text-xs font-medium text-textLight">
+                            <span className="text-xs font-medium text-gray-500">
                                 {connStatus === 'connected' ? 'TA 在线' : 
                                  connStatus === 'connecting' ? '连接中...' : 
-                                 connStatus === 'waiting' ? '等待对方...' : '离线'}
+                                 connStatus === 'waiting' ? '等待对方...' : 
+                                 connectError ? connectError.slice(0, 10) + '...' : '离线'}
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
                             {connStatus !== 'connected' && (
-                                <button onClick={handleReconnect} className="p-1.5 rounded-full bg-white/50 text-textLighter hover:text-primary transition-colors jelly-btn" title="重新连接">
+                                <button onClick={handleReconnect} className="w-8 h-8 rounded-full bg-white/70 text-gray-400 hover:text-gray-600 flex items-center justify-center jelly-btn">
                                     <Icons.Refresh className="w-4 h-4" />
                                 </button>
                             )}
-                            <button onClick={() => setShowSettings(true)} className="p-2 rounded-full text-textLight hover:bg-white/60 transition-colors jelly-btn">
-                                <Icons.Setting className="w-5 h-5" />
+                            <button onClick={() => setShowSettings(true)} className="w-8 h-8 rounded-full bg-white/70 text-gray-500 hover:text-gray-700 flex items-center justify-center jelly-btn">
+                                <Icons.Setting className="w-4 h-4" />
                             </button>
                         </div>
                     </header>
 
+                    {/* 连接错误提示 */}
+                    {connectError && (
+                        <div className="relative z-10 mx-5 mb-2 bg-red-50 text-red-500 px-4 py-2 rounded-xl text-xs flex items-center justify-between">
+                            <span>{connectError}</span>
+                            <button onClick={handleReconnect} className="text-red-600 font-bold ml-2">重试</button>
+                        </div>
+                    )}
+
                     {/* 纪念日卡片 */}
-                    <div className="px-6 pb-4 relative z-10">
-                        <div className="glass rounded-3xl p-5 shadow-sm flex items-center justify-between scale-in">
+                    <div className="relative z-10 px-5 pb-4">
+                        <div className="glass rounded-3xl p-5 shadow-sm flex items-center justify-between">
                             <div>
                                 <div className="flex items-baseline gap-1">
-                                    <p className="text-xs text-textLight">相爱</p>
-                                    <span className="text-4xl font-extrabold text-text">{days}</span>
-                                    <span className="text-lg text-textLight font-medium">天</span>
+                                    <p className="text-xs text-gray-500">相爱</p>
+                                    <span className="text-4xl font-bold text-[#4A403A]">{days}</span>
+                                    <span className="text-lg text-gray-500 font-medium">天</span>
                                 </div>
-                                {anniversary ? (
-                                    <p className="text-xs text-textLight mt-1">始于 {formatDateOnly(anniversary)}</p>
-                                ) : (
-                                    <p className="text-xs text-textLight mt-1">设置纪念日开始计时</p>
-                                )}
+                                <p className="text-xs text-gray-400 mt-1">
+                                    {anniversary ? '始于 ' + formatDateOnly(anniversary) : '设置纪念日开始计时'}
+                                </p>
                             </div>
-                            <div className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-500 ${tab === 'home' ? 'bg-primary/20 text-primary heartbeat' : 'bg-gray-100 text-gray-300'}`}>
-                                <Icons.Heart className="w-7 h-7" />
+                            <div className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${tab === 'home' ? 'bg-[#E8CFC8]/20 text-[#E8CFC8]' : 'bg-gray-100 text-gray-300'}`}>
+                                <Icons.Heart className={`w-7 h-7 ${tab === 'home' ? 'text-[#E8CFC8] heartbeat' : ''}`} />
                             </div>
                         </div>
                     </div>
 
                     {/* 内容区 */}
-                    <main className="flex-1 overflow-y-auto hide-scrollbar px-4 pb-28 relative z-0">
+                    <main className="flex-1 overflow-y-auto hide-scrollbar px-4 pb-24 relative z-0">
                         {tab === 'home' && (
                             <div className="space-y-3 pt-2">
                                 {timelineData.length === 0 ? (
-                                    <div className="flex flex-col items-center justify-center py-16 scale-in">
-                                        <div className="text-6xl mb-4 animate-bounce-soft">🌱</div>
-                                        <p className="text-textLight text-center mb-6">小窝还是空的，<br/>快去树洞或待办里留下点什么吧</p>
+                                    <div className="flex flex-col items-center justify-center py-20">
+                                        <div className="text-6xl mb-4">🌱</div>
+                                        <p className="text-gray-400 text-center mb-6 text-sm">小窝还是空的，<br/>快去树洞或待办里留下点什么吧</p>
                                         <div className="flex gap-2">
-                                            <button onClick={() => setTab('msg')} className="px-4 py-2 bg-primary/20 text-primary rounded-full text-sm jelly-btn">去树洞</button>
-                                            <button onClick={() => setTab('todo')} className="px-4 py-2 bg-accent/20 text-accent rounded-full text-sm jelly-btn">去待办</button>
+                                            <button onClick={() => setTab('msg')} className="px-4 py-2 bg-[#E8CFC8]/20 text-[#D4A5A5] rounded-full text-sm jelly-btn">去树洞</button>
+                                            <button onClick={() => setTab('todo')} className="px-4 py-2 bg-[#D4E4E6]/20 text-[#9CA3AF] rounded-full text-sm jelly-btn">去待办</button>
                                         </div>
                                     </div>
                                 ) : (
                                     timelineData.map((item, i) => (
-                                        <div key={i} className="animate-fade-in" style={{animationDelay: `${Math.min(i * 0.03, 0.3)}s`}}>
+                                        <div key={item.id} className="animate-fade-in" style={{animationDelay: `${Math.min(i * 0.05, 0.3)}s`}}>
                                             {item.kind === 'msg' ? <MsgCard msg={item} /> : <TodoCardMini todo={item} />}
                                         </div>
                                     ))
@@ -525,7 +619,6 @@
                             <TreeHoleView 
                                 messages={messages} 
                                 onSend={(text) => sendData('msg', { id: generateId(), text, ts: Date.now() })} 
-                                connStatus={connStatus}
                                 toast={showToast}
                             />
                         )}
@@ -546,9 +639,9 @@
                         )}
                     </main>
 
-                    {/* 底部导航栏 */}
-                    <nav className="absolute bottom-0 left-0 right-0 z-30 px-4 pb-4 pt-2">
-                        <div className="glass rounded-2xl p-2 shadow-lg border border-white/60 flex justify-around items-center">
+                    {/* 底部导航 */}
+                    <nav className="absolute bottom-0 left-0 right-0 z-30 px-4 pb-6 pt-2">
+                        <div className="glass rounded-2xl p-2 shadow-md border border-white/50 flex justify-around items-center">
                             <NavBtn icon={<Icons.List className="w-6 h-6"/>} label="待办" active={tab === 'todo'} onClick={() => setTab('todo')} />
                             <NavBtn icon={<Icons.Msg className="w-6 h-6"/>} label="树洞" active={tab === 'msg'} onClick={() => setTab('msg')} />
                             <NavBtn icon={<Icons.Home className="w-7 h-7"/>} label="时光" active={tab === 'home'} onClick={() => setTab('home')} isCenter={true} />
@@ -569,7 +662,7 @@
 
                     {/* Toast */}
                     {toast && (
-                        <div className="fixed top-28 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur px-5 py-2.5 rounded-full shadow-lg text-sm font-bold text-text z-50 animate-fade-in">
+                        <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-gray-800/90 backdrop-blur px-5 py-2.5 rounded-full shadow-lg text-sm font-bold text-white z-50 animate-fade-in">
                             {toast}
                         </div>
                     )}
@@ -577,242 +670,165 @@
             );
         }
 
-        // ================= 登录组件 =================
-        function LoginView({ myId, connStatus, connectError, onJoin, onRefresh, onRetry }) {
-            const [mode, setMode] = useState(null);
+        // ============ 登录页组件 ============
+        function LoginView({ myCode, connStatus, connectError, onPair, onCreate }) {
             const [inputCode, setInputCode] = useState('');
             const [copied, setCopied] = useState(false);
-            const [isJoining, setIsJoining] = useState(false);
 
             const handleCopy = () => {
-                navigator.clipboard.writeText(myId).then(() => {
+                navigator.clipboard.writeText(myCode).then(() => {
                     setCopied(true);
                     setTimeout(() => setCopied(false), 2000);
                 }).catch(() => {
-                    const textArea = document.createElement("textarea");
-                    textArea.value = myId;
+                    // Fallback
+                    const textArea = document.createElement('textarea');
+                    textArea.value = myCode;
                     document.body.appendChild(textArea);
                     textArea.select();
-                    document.execCommand("copy");
+                    document.execCommand('copy');
                     document.body.removeChild(textArea);
                     setCopied(true);
                     setTimeout(() => setCopied(false), 2000);
                 });
             };
 
-            if (mode === 'create' && myId) {
-                return (
-                    <div className="h-full flex flex-col items-center justify-center bg-homeBg p-6 relative scale-in">
-                        <h1 className="text-5xl font-extrabold text-primary mb-2" style={{fontFamily: 'YikeFont'}}>Yike</h1>
-                        <p className="text-textLight mb-8 text-sm">情侣的数字秘密小窝</p>
-                        
-                        <div className="w-full bg-white rounded-3xl p-6 text-center shadow-sm border border-primary/10 mb-6">
-                            <div className="text-xs text-textLight mb-3 uppercase tracking-wider">分享暗号给 TA</div>
-                            <div onClick={handleCopy} className="group relative bg-yellowLight/50 p-4 rounded-xl cursor-pointer hover:bg-yellowLight transition-colors active:scale-95">
-                                <p className="text-lg font-mono font-bold text-text break-all select-all">{myId}</p>
-                                <div className="absolute top-2 right-2 text-textLighter">
-                                    {copied ? <span className="text-xs text-success">已复制!</span> : <Icons.Copy className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />}
-                                </div>
-                            </div>
-                            <p className="text-xs text-textLighter mt-3">点击暗号复制后发送给 TA</p>
+            return (
+                <div className="h-full flex flex-col items-center justify-center bg-[#FDFBF7] p-6 animate-fade-in">
+                    <div className="mb-8 relative">
+                        <div className="w-24 h-24 rounded-full bg-[#E8CFC8]/20 flex items-center justify-center">
+                            <Icons.Heart className="w-12 h-12 text-[#E8CFC8] heartbeat" />
                         </div>
-                        
-                        <div className="w-full mb-4 space-y-2">
-                            {connectError && (
-                                <div className="bg-danger/10 text-danger px-4 py-3 rounded-xl text-sm">
-                                    {connectError}
-                                </div>
-                            )}
-                            
-                            {connStatus === 'waiting' ? (
-                                <div className="flex items-center justify-center gap-2 text-sm text-textLight bg-white/60 px-4 py-3 rounded-full">
-                                    <div className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></div>
-                                    <span>等待 TA 输入暗号...</span>
-                                </div>
-                            ) : connStatus === 'connecting' ? (
-                                <div className="flex items-center justify-center gap-2 text-sm text-textLight bg-white/60 px-4 py-3 rounded-full">
-                                    <Icons.Refresh className="w-4 h-4 spin" />
-                                    <span>正在连接...</span>
-                                </div>
-                            ) : connStatus === 'connected' ? (
-                                <div className="flex items-center justify-center gap-2 text-sm text-success bg-success/10 px-4 py-3 rounded-full">
-                                    <Icons.Check className="w-4 h-4" />
-                                    <span>连接成功！即将进入...</span>
-                                </div>
-                            ) : (
-                                <div className="flex items-center justify-center gap-2 text-sm text-textLight bg-white/60 px-4 py-3 rounded-full">
-                                    <div className="w-2 h-2 rounded-full bg-gray-300"></div>
-                                    <span>等待中...</span>
-                                </div>
-                            )}
-                        </div>
-                        
-                        {connectError && (
-                            <button onClick={onRetry} className="w-full py-3 mb-2 bg-primary/20 text-primary rounded-xl font-medium jelly-btn">
-                                重新连接
-                            </button>
-                        )}
-                        
-                        <button onClick={() => setMode(null)} className="mt-2 text-sm text-textLighter hover:text-text transition-colors">返回</button>
                     </div>
-                );
-            }
-
-            if (mode === 'join') {
-                return (
-                    <div className="h-full flex flex-col justify-center bg-treeholeBg p-6 scale-in">
-                        <h1 className="text-3xl font-bold text-text text-center mb-8">找到彼此</h1>
+                    <h1 className="text-5xl font-bold text-[#D4A5A5] mb-2">伊可</h1>
+                    <p className="text-gray-400 mb-12 text-sm">情侣的数字秘密小窝</p>
+                    
+                    {myCode && (
+                        <div className="w-full bg-white rounded-2xl p-6 text-center shadow-sm border border-gray-100 mb-6">
+                            <p className="text-xs text-gray-400 mb-4 uppercase tracking-wider">你的专属暗号</p>
+                            <div onClick={handleCopy} className="bg-[#FDFBF7] p-4 rounded-xl cursor-pointer border-2 border-dashed border-gray-200 hover:border-[#E8CFC8] transition-colors jelly-btn">
+                                <p className="input-code text-[#4A403A]">{myCode}</p>
+                                <p className="text-xs text-gray-400 mt-2">{copied ? '已复制！' : '点击复制分享给TA'}</p>
+                            </div>
+                        </div>
+                    )}
+                    
+                    <div className="w-full space-y-3">
+                        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+                            <p className="text-xs text-gray-400 mb-2">输入TA的暗号</p>
+                            <input 
+                                className="w-full input-code text-center bg-transparent outline-none py-2 text-[#4A403A]"
+                                placeholder="123456"
+                                value={inputCode}
+                                onChange={e => setInputCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                maxLength={6}
+                            />
+                        </div>
                         
+                        <button 
+                            onClick={() => onPair(inputCode)}
+                            disabled={inputCode.length !== 6}
+                            className="w-full py-4 bg-[#E8CFC8] text-white rounded-2xl font-bold shadow-md shadow-[#E8CFC8]/30 active:scale-95 transition-transform jelly-btn disabled:opacity-50"
+                        >
+                            牵手进入小窝
+                        </button>
+                        
+                        <div className="flex items-center gap-4 py-2">
+                            <div className="flex-1 h-px bg-gray-200"></div>
+                            <span className="text-xs text-gray-400">或</span>
+                            <div className="flex-1 h-px bg-gray-200"></div>
+                        </div>
+                        
+                        <button 
+                            onClick={onCreate}
+                            className="w-full py-4 bg-white text-[#4A403A] rounded-2xl font-bold shadow-sm border border-gray-100 active:scale-95 transition-transform jelly-btn"
+                        >
+                            创建新小窝
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        // ============ 创建页组件 ============
+        function CreateView({ myCode, connStatus, connectError, onBack }) {
+            const [copied, setCopied] = useState(false);
+
+            const handleCopy = () => {
+                navigator.clipboard.writeText(myCode).then(() => {
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                }).catch(() => {
+                    const textArea = document.createElement('textarea');
+                    textArea.value = myCode;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                });
+            };
+
+            return (
+                <div className="h-full flex flex-col items-center justify-center bg-[#FDFBF7] p-6 animate-fade-in">
+                    <div className="w-20 h-20 rounded-full bg-[#E8CFC8]/20 flex items-center justify-center mb-6">
+                        <Icons.Heart className="w-10 h-10 text-[#E8CFC8] heartbeat" />
+                    </div>
+                    <h1 className="text-3xl font-bold text-[#4A403A] mb-2">小窝已创建</h1>
+                    <p className="text-gray-400 mb-8 text-sm text-center">把暗号发给TA，等待TA输入后就能一起进入小窝啦</p>
+                    
+                    <div className="w-full bg-white rounded-2xl p-6 text-center shadow-sm border border-[#E8CFC8]/20 mb-6">
+                        <p className="text-xs text-[#E8CFC8] mb-4 uppercase tracking-wider font-bold">分享给TA</p>
+                        <div onClick={handleCopy} className="bg-[#FDFBF7] p-6 rounded-xl cursor-pointer border-2 border-dashed border-[#E8CFC8]/30 hover:border-[#E8CFC8] transition-colors jelly-btn">
+                            <p className="input-code text-[#4A403A]">{myCode}</p>
+                            <p className="text-xs text-gray-400 mt-3">{copied ? '✓ 已复制！' : '点击复制'}</p>
+                        </div>
+                    </div>
+                    
+                    <div className="w-full mb-4">
                         {connectError && (
-                            <div className="mb-4 bg-danger/10 text-danger px-4 py-3 rounded-xl text-sm">
+                            <div className="bg-red-50 text-red-500 px-4 py-3 rounded-xl text-sm mb-3">
                                 {connectError}
                             </div>
                         )}
                         
-                        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-                            <div className="p-4 border-b border-gray-50">
-                                <input 
-                                    className="w-full text-center text-lg font-mono outline-none bg-transparent placeholder-textLighter"
-                                    placeholder="粘贴 TA 的暗号"
-                                    value={inputCode}
-                                    onChange={e => setInputCode(e.target.value)}
-                                />
+                        {connStatus === 'waiting' ? (
+                            <div className="flex items-center justify-center gap-2 text-sm text-gray-500 bg-white/60 px-4 py-3 rounded-full">
+                                <div className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></div>
+                                <span>等待TA输入暗号...</span>
                             </div>
-                        </div>
-                        <button 
-                            onClick={() => {
-                                if (!inputCode.trim()) {
-                                    alert('请输入暗号');
-                                    return;
-                                }
-                                setIsJoining(true);
-                                setTimeout(() => {
-                                    onJoin(inputCode.trim());
-                                }, 500);
-                            }} 
-                            disabled={isJoining}
-                            className="mt-4 w-full py-4 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-primary/30 active:scale-95 transition-transform jelly-btn disabled:opacity-50"
-                        >
-                            {isJoining ? '连接中...' : '牵手 TA'}
-                        </button>
-                        <button onClick={() => setMode(null)} className="mt-4 text-center text-sm text-textLighter">返回</button>
+                        ) : connStatus === 'connected' ? (
+                            <div className="flex items-center justify-center gap-2 text-sm text-green-500 bg-green-50/50 px-4 py-3 rounded-full">
+                                <Icons.Check className="w-4 h-4" />
+                                <span>连接成功！</span>
+                            </div>
+                        ) : (
+                            <div className="flex items-center justify-center gap-2 text-sm text-gray-400 bg-white/60 px-4 py-3 rounded-full">
+                                <span>等待中...</span>
+                            </div>
+                        )}
                     </div>
-                );
-            }
-
-            // Landing 页
-            return (
-                <div className="h-full flex flex-col items-center justify-center bg-homeBg p-6 scale-in">
-                    <div className="mb-2 relative">
-                        <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center">
-                            <Icons.Heart className="w-10 h-10 text-primary heartbeat" />
-                        </div>
-                    </div>
-                    <h1 className="text-5xl font-extrabold text-primary mb-2" style={{fontFamily: 'YikeFont'}}>Yike</h1>
-                    <p className="text-textLight mb-12 text-sm">情侣的数字秘密小窝</p>
                     
-                    <button 
-                        onClick={() => {
-                            const id = generateId();
-                            localStorage.setItem('yike_myId', id);
-                            setMode('create');
-                        }} 
-                        className="w-full py-4 bg-white text-text rounded-2xl font-bold shadow-sm mb-4 active:scale-95 transition-transform border border-gray-100 jelly-btn"
-                    >
-                        创建小窝
-                    </button>
-                    <button 
-                        onClick={() => setMode('join')} 
-                        className="w-full py-4 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-primary/30 active:scale-95 transition-transform jelly-btn"
-                    >
-                        输入暗号牵手
+                    <button onClick={onBack} className="text-sm text-gray-400 hover:text-gray-600 jelly-btn">
+                        返回重新创建
                     </button>
                 </div>
             );
         }
 
-        // ================= 树洞组件 =================
-        function TreeHoleView({ messages, onSend, connStatus, toast }) {
+        // ============ 树洞组件 ============
+        function TreeHoleView({ messages, onSend, toast }) {
             const [text, setText] = useState('');
-            const [isRecording, setIsRecording] = useState(false);
-            const [recordingTime, setRecordingTime] = useState(0);
-            const [audioBlob, setAudioBlob] = useState(null);
-            const mediaRecorderRef = useRef(null);
-            const timerRef = useRef(null);
+            const messagesEndRef = useRef(null);
 
-            const startRecording = async () => {
-                try {
-                    if (!navigator.mediaDevices) {
-                        toast('您的浏览器不支持录音功能');
-                        return;
-                    }
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorderRef.current = new MediaRecorder(stream);
-                    const chunks = [];
-                    
-                    mediaRecorderRef.current.ondataavailable = (e) => {
-                        if (e.data.size > 0) chunks.push(e.data);
-                    };
-                    
-                    mediaRecorderRef.current.onstop = () => {
-                        const blob = new Blob(chunks, { type: 'audio/webm' });
-                        setAudioBlob(blob);
-                        stream.getTracks().forEach(track => track.stop());
-                    };
-                    
-                    mediaRecorderRef.current.start();
-                    setIsRecording(true);
-                    setRecordingTime(0);
-                    
-                    timerRef.current = setInterval(() => {
-                        setRecordingTime(prev => {
-                            if (prev >= 30) {
-                                stopRecording();
-                                return 30;
-                            }
-                            return prev + 1;
-                        });
-                    }, 1000);
-                    
-                } catch (e) {
-                    toast('无法访问麦克风，请检查权限');
-                }
-            };
-
-            const stopRecording = () => {
-                if (mediaRecorderRef.current && isRecording) mediaRecorderRef.current.stop();
-                if (timerRef.current) clearInterval(timerRef.current);
-                setIsRecording(false);
-            };
-
-            const playAudio = () => {
-                if (audioBlob) new Audio(URL.createObjectURL(audioBlob)).play();
-            };
-
-            const clearAudio = () => {
-                setAudioBlob(null);
-                setRecordingTime(0);
-            };
+            useEffect(() => {
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }, [messages]);
 
             const handleSend = () => {
-                if (audioBlob) {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                        const msg = {
-                            id: generateId(),
-                            text: '🎤 语音消息',
-                            audio: reader.result,
-                            isAudio: true,
-                            ts: Date.now()
-                        };
-                        onSend(msg.text, msg);
-                        clearAudio();
-                    };
-                    reader.readAsDataURL(audioBlob);
-                } else if (text.trim()) {
-                    onSend(text);
-                    setText('');
-                }
+                if (!text.trim()) return;
+                onSend(text);
+                setText('');
             };
 
             return (
@@ -820,67 +836,30 @@
                     <div className="flex-1 overflow-y-auto hide-scrollbar space-y-3 pt-2">
                         {messages.map(m => <MsgCard key={m.id} msg={m} />)}
                         {messages.length === 0 && (
-                            <div className="flex flex-col items-center justify-center mt-20 scale-in">
-                                <div className="text-6xl mb-4 animate-bounce-soft">📮</div>
-                                <p className="text-textLight text-sm">树洞空空荡荡...</p>
-                                <p className="text-xs text-textLighter mt-1">成为第一个留下足迹的人吧</p>
+                            <div className="flex flex-col items-center justify-center mt-20">
+                                <div className="text-5xl mb-4">📮</div>
+                                <p className="text-gray-400 text-sm">树洞空空荡荡...</p>
+                                <p className="text-xs text-gray-300 mt-1">成为第一个留下足迹的人吧</p>
                             </div>
                         )}
+                        <div ref={messagesEndRef} />
                     </div>
                     
-                    <div className="fixed bottom-24 left-6 right-6 z-20">
-                        {isRecording && (
-                            <div className="mb-2 flex items-center justify-center gap-2 animate-fade-in">
-                                <div className="flex gap-1">
-                                    <div className="w-2 h-8 rounded-full bg-danger recording-wave"></div>
-                                    <div className="w-2 h-8 rounded-full bg-danger recording-wave" style={{animationDelay: '0.2s'}}></div>
-                                    <div className="w-2 h-8 rounded-full bg-danger recording-wave" style={{animationDelay: '0.4s'}}></div>
-                                </div>
-                                <span className="text-danger font-medium ml-2">{recordingTime}s</span>
-                                <button onClick={stopRecording} className="ml-2 px-3 py-1 bg-danger text-white rounded-full text-xs jelly-btn">完成</button>
-                            </div>
-                        )}
-
-                        {audioBlob && !isRecording && (
-                            <div className="mb-2 bg-white rounded-xl p-3 flex items-center gap-3 shadow-sm animate-fade-in">
-                                <button onClick={playAudio} className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center flex-shrink-0 jelly-btn">
-                                    <Icons.Play className="w-4 h-4 ml-0.5" />
-                                </button>
-                                <div className="flex-1">
-                                    <div className="text-xs text-textLight mb-1">录音预览</div>
-                                    <div className="h-2 bg-yellowLight rounded-full overflow-hidden">
-                                        <div className="w-1/3 h-full bg-primary animate-pulse"></div>
-                                    </div>
-                                </div>
-                                <button onClick={clearAudio} className="p-2 text-textLighter hover:text-danger jelly-btn">
-                                    <Icons.Close className="w-4 h-4" />
-                                </button>
-                            </div>
-                        )}
-
-                        <div className="glass rounded-full p-2 flex items-center shadow-md">
-                            <button 
-                                onClick={isRecording ? stopRecording : startRecording}
-                                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors flex-shrink-0 jelly-btn ${isRecording ? 'bg-danger text-white animate-pulse' : 'text-textLighter hover:bg-white'}`}
-                            >
-                                {isRecording ? <Icons.MicOff className="w-5 h-5" /> : <Icons.Mic className="w-5 h-5" />}
-                            </button>
-                            
+                    <div className="fixed bottom-20 left-0 right-0 px-4 z-20">
+                        <div className="flex items-center gap-2">
                             <input 
-                                className="flex-1 bg-transparent px-4 py-2 outline-none text-sm"
-                                placeholder={audioBlob ? '点击发送' : "说点什么..."}
+                                className="flex-1 bg-white/80 backdrop-blur px-4 py-3 rounded-full outline-none text-sm shadow-sm placeholder-gray-400 border border-white/50"
+                                placeholder="说点什么..."
                                 value={text}
                                 onChange={e => setText(e.target.value)}
                                 onKeyDown={e => e.key === 'Enter' && handleSend()}
-                                disabled={!!audioBlob}
                             />
-                            
                             <button 
                                 onClick={handleSend}
-                                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all flex-shrink-0 jelly-btn ${text.trim() || audioBlob ? 'bg-primary text-white' : 'bg-gray-100 text-gray-300'}`}
-                                disabled={!text.trim() && !audioBlob}
+                                disabled={!text.trim()}
+                                className={`w-12 h-12 rounded-full flex items-center justify-center transition-all jelly-btn ${text.trim() ? 'bg-[#E8CFC8] text-white shadow-md' : 'bg-gray-100 text-gray-300'}`}
                             >
-                                <Icons.Send className="w-4 h-4" />
+                                <Icons.Send className="w-5 h-5" />
                             </button>
                         </div>
                     </div>
@@ -888,21 +867,10 @@
             );
         }
 
-        // ================= 待办组件 =================
+        // ============ 待办组件 ============
         function TodoView({ todos, onAdd, onToggle, onDelete }) {
             const [text, setText] = useState('');
-            const [showDeleteMode, setShowDeleteMode] = useState(false);
             
-            const groupedTodos = useMemo(() => {
-                const groups = {};
-                todos.forEach(todo => {
-                    const date = new Date(todo.ts).toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' });
-                    if (!groups[date]) groups[date] = [];
-                    groups[date].push(todo);
-                });
-                return groups;
-            }, [todos]);
-
             const handleAdd = () => {
                 if (!text.trim()) return;
                 onAdd(text);
@@ -910,69 +878,55 @@
             };
 
             return (
-                <div className="space-y-4 pb-28 scale-in">
+                <div className="space-y-3 pb-24">
                     <div className="flex gap-2">
                         <input 
-                            className="flex-1 bg-white p-3 rounded-xl outline-none text-sm shadow-sm placeholder-textLighter"
+                            className="flex-1 bg-white p-3 rounded-xl outline-none text-sm shadow-sm placeholder-gray-400 border border-gray-100"
                             placeholder="添加小事..."
                             value={text}
                             onChange={e => setText(e.target.value)}
                             onKeyDown={e => e.key === 'Enter' && handleAdd()}
                         />
-                        <button 
-                            onClick={() => setShowDeleteMode(!showDeleteMode)}
-                            className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors jelly-btn ${showDeleteMode ? 'bg-danger/20 text-danger' : 'bg-white text-textLighter'}`}
-                        >
-                            <Icons.Trash className="w-5 h-5" />
-                        </button>
-                        <button onClick={handleAdd} className="w-12 h-12 rounded-xl bg-primary text-white flex items-center justify-center jelly-btn">
+                        <button onClick={handleAdd} className="w-12 h-12 rounded-xl bg-[#E8CFC8] text-white flex items-center justify-center jelly-btn">
                             <Icons.Plus className="w-5 h-5" />
                         </button>
                     </div>
                     
-                    {Object.entries(groupedTodos).map(([date, items]) => (
-                        <div key={date} className="space-y-2">
-                            <div className="flex items-center gap-2 text-xs font-medium text-textLighter py-1">
-                                <Icons.Clock className="w-3 h-3" />
-                                {date}
+                    <div className="space-y-2">
+                        {todos.map(todo => (
+                            <div key={todo.id} className="flex items-center gap-3 bg-white/80 p-3 rounded-xl border border-white/50 transition-all animate-slide-up">
+                                <button 
+                                    onClick={() => onToggle(todo)}
+                                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 jelly-btn ${todo.done ? 'bg-[#D4E4E6] border-[#D4E4E6]' : 'border-gray-300 hover:border-[#E8CFC8]'}`}
+                                >
+                                    {todo.done && <Icons.Check className="w-3 h-3 text-white" />}
+                                </button>
+                                <span className={`flex-1 text-sm ${todo.done ? 'line-through text-gray-400' : 'text-[#4A403A]'}`}>
+                                    {todo.text}
+                                </span>
+                                <button onClick={() => onDelete(todo.id)} className="p-2 text-gray-300 hover:text-red-400 jelly-btn">
+                                    <Icons.Trash className="w-4 h-4" />
+                                </button>
                             </div>
-                            {items.map(todo => (
-                                <div key={todo.id} className={`flex items-center gap-3 bg-white/80 p-3 rounded-xl border border-white/50 transition-all ${showDeleteMode ? 'pr-2' : ''}`}>
-                                    <button 
-                                        onClick={() => onToggle(todo)}
-                                        className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all jelly-btn ${todo.done ? 'bg-success border-success' : 'border-textLighter/30 hover:border-primary'}`}
-                                    >
-                                        {todo.done && <Icons.Check className="w-3 h-3 text-white" />}
-                                    </button>
-                                    <span className={`flex-1 text-sm ${todo.done ? 'line-through text-textLighter' : 'text-text'}`}>
-                                        {todo.text}
-                                    </span>
-                                    {showDeleteMode && (
-                                        <button onClick={() => onDelete(todo.id)} className="p-2 text-danger/70 hover:text-danger delete-btn jelly-btn">
-                                            <Icons.Delete className="w-4 h-4" />
-                                        </button>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                     
                     {todos.length === 0 && (
-                        <div className="flex flex-col items-center justify-center mt-16 scale-in">
-                            <div className="text-6xl mb-4 animate-bounce-soft">✨</div>
-                            <p className="text-textLight text-sm">还没有待办事项</p>
+                        <div className="flex flex-col items-center justify-center mt-16">
+                            <div className="text-5xl mb-4">✨</div>
+                            <p className="text-gray-400 text-sm">还没有待办事项</p>
                         </div>
                     )}
                 </div>
             );
         }
 
-        // ================= 通用组件 =================
+        // ============ 通用组件 ============
         function NavBtn({ icon, label, active, onClick, isCenter }) {
             return (
-                <button onClick={onClick} className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all jelly-btn ${active ? 'text-primary scale-105' : 'text-textLighter hover:text-text'}`}>
+                <button onClick={onClick} className={`flex flex-col items-center justify-center py-2 px-4 rounded-xl transition-all jelly-btn ${active ? 'text-[#E8CFC8]' : 'text-gray-400 hover:text-gray-600'}`}>
                     <div className={isCenter ? 'mb-1' : ''}>{icon}</div>
-                    <span className={`text-[10px] font-medium ${active ? 'text-primary' : ''}`}>{label}</span>
+                    <span className={`text-[10px] font-medium ${active ? 'text-[#E8CFC8]' : ''}`}>{label}</span>
                 </button>
             );
         }
@@ -980,76 +934,58 @@
         function MsgCard({ msg }) {
             return (
                 <div className={`flex ${msg.self ? 'justify-end' : 'justify-start'}`}>
-                    {msg.isAudio ? (
-                        <div className={`max-w-[80%] p-3 rounded-2xl shadow-sm ${msg.self ? 'bg-primary text-white' : 'bg-white text-text'}`}>
-                            <div className="flex items-center gap-3">
-                                <button onClick={() => msg.audio && new Audio(msg.audio).play()} className={`w-10 h-10 rounded-full flex items-center justify-center ${msg.self ? 'bg-white/20' : 'bg-primary/20'} jelly-btn`}>
-                                    <Icons.Play className={`w-4 h-4 ${msg.self ? 'text-white' : 'text-primary'}`} />
-                                </button>
-                                <div>
-                                    <div className="flex items-center gap-2">
-                                        <Icons.FileAudio className={`w-4 h-4 ${msg.self ? 'text-white/70' : 'text-textLighter'}`} />
-                                        <span className="text-sm">语音消息</span>
-                                    </div>
-                                    <div className={`text-[10px] mt-1 ${msg.self ? 'text-white/70' : 'text-textLighter'}`}>{formatTime(msg.ts)}</div>
-                                </div>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className={`max-w-[82%] p-3.5 rounded-2xl shadow-sm text-sm leading-relaxed ${msg.self ? 'bg-primary text-white rounded-br-sm' : 'bg-white text-text rounded-bl-sm'}`}>
-                            {msg.text}
-                            <div className={`text-[10px] mt-1.5 ${msg.self ? 'text-white/70' : 'text-textLighter'}`}>{formatTime(msg.ts)}</div>
-                        </div>
-                    )}
+                    <div className={`max-w-[80%] px-4 py-3 rounded-2xl shadow-sm text-sm ${msg.self ? 'bg-[#E8CFC8] text-white rounded-br-sm' : 'bg-white text-[#4A403A] rounded-bl-sm'}`}>
+                        {msg.text}
+                        <div className={`text-[10px] mt-1 ${msg.self ? 'text-white/70' : 'text-gray-400'}`}>{formatTime(msg.ts)}</div>
+                    </div>
                 </div>
             );
         }
 
         function TodoCardMini({ todo }) {
             return (
-                <div className={`flex items-center gap-2 p-2.5 rounded-lg text-xs ${todo.done ? 'bg-white/30 line-through text-textLighter' : 'bg-yellowLight/60 text-text'}`}>
-                    <div className={`w-1.5 h-1.5 rounded-full ${todo.done ? 'bg-textLighter' : 'bg-primary'}`}></div>
+                <div className={`flex items-center gap-2 p-2.5 rounded-lg text-xs ${todo.done ? 'bg-white/30 line-through text-gray-400' : 'bg-[#E8CFC8]/20 text-[#4A403A]'}`}>
+                    <div className={`w-1.5 h-1.5 rounded-full ${todo.done ? 'bg-gray-300' : 'bg-[#E8CFC8]'}`}></div>
                     <span className="flex-1 truncate">{todo.text}</span>
                     <span className="text-[10px] opacity-60">{new Date(todo.ts).toLocaleTimeString('zh-CN', {hour:'2-digit', minute:'2-digit'})}</span>
                 </div>
             );
         }
 
-        // ================= 设置组件 =================
         function SettingsView({ anniversary, onSave, onClose }) {
             const [date, setDate] = useState(anniversary ? formatDateOnly(anniversary) : '');
 
             return (
-                <div className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm flex items-end sm:items-center justify-center">
-                    <div className="bg-bg w-full max-w-[420px] sm:rounded-t-3xl sm:rounded-b-3xl p-6 animate-fade-in">
+                <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-end justify-center animate-fade-in">
+                    <div className="bg-[#FDFBF7] w-full max-w-[400px] rounded-t-3xl p-6 shadow-2xl animate-slide-up">
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-xl font-bold text-text">小窝设置</h2>
-                            <button onClick={onClose} className="w-8 h-8 rounded-full bg-white text-textLighter flex items-center justify-center hover:bg-gray-100 jelly-btn">
+                            <h2 className="text-xl font-bold text-[#4A403A]">小窝设置</h2>
+                            <button onClick={onClose} className="w-8 h-8 rounded-full bg-white text-gray-400 flex items-center justify-center hover:bg-gray-100 jelly-btn">
                                 <Icons.Close className="w-4 h-4" />
                             </button>
                         </div>
                         
                         <div className="space-y-6">
                             <div className="space-y-2">
-                                <label className="flex items-center gap-2 text-sm font-bold text-text">
-                                    <Icons.Calendar className="w-4 h-4 text-primary" />
+                                <label className="flex items-center gap-2 text-sm font-bold text-[#4A403A]">
+                                    <Icons.Calendar className="w-4 h-4 text-[#E8CFC8]" />
                                     纪念日
                                 </label>
                                 <input 
                                     type="date" 
-                                    className="w-full p-4 rounded-xl bg-white border border-gray-100 outline-none text-text shadow-sm"
+                                    className="w-full p-4 rounded-xl bg-white outline-none text-[#4A403A] shadow-sm border border-gray-100"
                                     value={date}
                                     onChange={e => setDate(e.target.value)}
                                 />
-                                <p className="text-xs text-textLighter">设置我们在一起的第一天</p>
+                                <p className="text-xs text-gray-400">设置我们在一起的第一天</p>
                             </div>
                             
-                            <button onClick={() => onSave(date ? new Date(date).getTime() : Date.now())} className="w-full py-4 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-primary/30 active:scale-95 transition-transform jelly-btn">
+                            <button onClick={() => onSave(date ? new Date(date).getTime() : Date.now())} className="w-full py-4 bg-[#E8CFC8] text-white rounded-2xl font-bold shadow-lg shadow-[#E8CFC8]/30 active:scale-95 transition-transform jelly-btn">
                                 保存设置
                             </button>
                             
-                            <div className="pt-4 border-t border-gray-100">
-                                <button onClick={() => { if(confirm('确定要清空所有数据吗？')) { localStorage.clear(); window.location.reload(); } }} className="w-full py-3 text-sm text-danger hover:bg-danger/5 rounded-xl transition-colors jelly-btn">
+                            <div className="pt-4 border-t border-gray-200">
+                                <button onClick={() => { if(confirm('确定要清空所有数据吗？')) { Storage.clearAll(); window.location.reload(); } }} className="w-full py-3 text-sm text-red-400 hover:bg-red-50 rounded-xl transition-colors jelly-btn">
                                     清空所有数据
                                 </button>
                             </div>
@@ -1059,6 +995,7 @@
             );
         }
 
+        // ============ 渲染应用 ============
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
